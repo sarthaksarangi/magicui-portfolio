@@ -187,7 +187,7 @@ export const DATA = {
       links: [
         {
           type: "Website",
-          href: "https://medium-blog-fe.vercel.app",
+          href: "https://blogify.sarthaksarangi.com",
           icon: <Icons.globe className="size-3" />,
         },
         {

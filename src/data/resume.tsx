@@ -202,25 +202,37 @@ export const DATA = {
     },
     {
       title: "MockPay",
-      href: "#",
+      href: "https://github.com/sarthaksarangi/payment-app",
       dates: "Jun 2024 – Aug 2024",
       active: false,
       description:
         "Engineered a secure peer-to-peer payment system using the MERN stack. Implemented JWT-based authentication, role-based permissions, wallet management, and transaction history. Optimized MongoDB queries using indexing to support real-time transfers across 50+ test accounts.",
       technologies: ["MongoDB", "Express.js", "React", "Node.js", "JWT"],
-      links: [],
+      links: [
+        {
+          type: "Source",
+          href: "https://github.com/sarthaksarangi/payment-app",
+          icon: <Icons.github className="size-3" />,
+        },
+      ],
       image: "",
       video: "",
     },
     {
       title: "AI Keyword Extractor",
-      href: "#",
+      href: "https://github.com/sarthaksarangi/keyword-extractor-openai",
       dates: "Mar 2024 – Apr 2024",
       active: false,
       description:
         "Built a React-based AI tool integrating OpenAI GPT APIs to extract 5–15 contextually relevant keywords from long-form text. Designed efficient prompt workflows and optimized API usage to handle documents up to 2,000 words with predictable latency.",
       technologies: ["React", "TypeScript", "OpenAI API", "Chakra UI"],
-      links: [],
+      links: [
+        {
+          type: "Source",
+          href: "https://github.com/sarthaksarangi/keyword-extractor-openai",
+          icon: <Icons.github className="size-3" />,
+        },
+      ],
       image: "",
       video: "",
     },

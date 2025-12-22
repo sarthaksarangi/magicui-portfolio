@@ -41,7 +41,7 @@ export default function Page() {
                 <AvatarImage
                   alt={DATA.name}
                   src={DATA.avatarUrl}
-                  loading="eager"
+                  priority={true}
                 />
                 <AvatarFallback>{DATA.initials}</AvatarFallback>
               </Avatar>

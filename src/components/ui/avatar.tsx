@@ -28,14 +28,12 @@ const AvatarImage = React.forwardRef<
   }
 >(({ className, priority, src, ...props }, ref) =>
   src ? (
-    <Image
+    <img
       ref={ref}
       src={src}
       alt={props.alt || ""}
-      className={cn("aspect-square h-full w-full", className)}
-      fill
-      priority={priority}
-      sizes="(max-width: 768px) 100px, 120px"
+      className={cn("aspect-square h-full w-full object-contain", className)}
+      {...props}
     />
   ) : null
 );

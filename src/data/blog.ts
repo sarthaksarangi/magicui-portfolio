@@ -15,6 +15,22 @@ type Metadata = {
   image?: string;
 };
 
+// Open external links in blog posts in a new tab.
+function rehypeExternalLinks() {
+  const visit = (node: any) => {
+    if (
+      node.type === "element" &&
+      node.tagName === "a" &&
+      /^https?:\/\//.test(node.properties?.href ?? "")
+    ) {
+      node.properties.target = "_blank";
+      node.properties.rel = ["noopener", "noreferrer"];
+    }
+    node.children?.forEach(visit);
+  };
+  return (tree: any) => visit(tree);
+}
+
 function getMDXFiles(dir: string) {
   return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx");
 }
@@ -24,6 +40,7 @@ export async function markdownToHTML(markdown: string) {
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype)
+    .use(rehypeExternalLinks)
     .use(rehypePrettyCode, {
       // https://rehype-pretty.pages.dev/#usage
       theme: {

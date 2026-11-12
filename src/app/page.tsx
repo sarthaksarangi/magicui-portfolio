@@ -1,20 +1,20 @@
-import { HackathonCard } from "@/components/hackathon-card";
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
+import { MarkdownLink } from "@/components/markdown-link";
 import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DATA } from "@/data/resume";
+import { MapPinIcon } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import Markdown from "react-markdown";
 
 const BLUR_FADE_DELAY = 0.04;
 export const metadata: Metadata = {
-  title: "Sarthak Sarangi – Software Engineer",
-  description:
-    "Software Engineer building scalable full-stack and backend systems.",
+  title: `${DATA.name} – ${DATA.title}`,
+  description: DATA.description,
 };
 
 export default function Page() {
@@ -35,6 +35,19 @@ export default function Page() {
                 delay={BLUR_FADE_DELAY}
                 text={DATA.description}
               />
+              <BlurFade delay={BLUR_FADE_DELAY * 2}>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2 text-sm">
+                  <Link
+                    href={DATA.locationLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-muted-foreground hover:underline"
+                  >
+                    <MapPinIcon className="size-3.5" />
+                    {DATA.location}
+                  </Link>
+                </div>
+              </BlurFade>
             </div>
             <BlurFade delay={BLUR_FADE_DELAY}>
               <Avatar className="size-28 border">
@@ -50,14 +63,19 @@ export default function Page() {
         </div>
       </section>
       <section id="about">
-        <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 className="text-xl font-bold">About</h2>
-        </BlurFade>
-        <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
-            {DATA.summary}
-          </Markdown>
-        </BlurFade>
+        <div className="flex min-h-0 flex-col gap-y-3">
+          <BlurFade delay={BLUR_FADE_DELAY * 3}>
+            <h2 className="text-xl font-bold">About</h2>
+          </BlurFade>
+          <BlurFade delay={BLUR_FADE_DELAY * 4}>
+            <Markdown
+              components={{ a: MarkdownLink }}
+              className="prose max-w-full space-y-3 text-pretty font-sans text-sm text-muted-foreground dark:prose-invert [&>p]:my-0"
+            >
+              {DATA.summary}
+            </Markdown>
+          </BlurFade>
+        </div>
       </section>
       <section id="work">
         <div className="flex min-h-0 flex-col gap-y-3">
@@ -106,10 +124,22 @@ export default function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 9}>
             <h2 className="text-xl font-bold">Skills</h2>
           </BlurFade>
-          <div className="flex flex-wrap gap-1">
-            {DATA.skills.map((skill, id) => (
-              <BlurFade key={skill} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-                <Badge key={skill}>{skill}</Badge>
+          <div className="flex flex-col gap-y-3">
+            {DATA.skills.map((group, id) => (
+              <BlurFade
+                key={group.category}
+                delay={BLUR_FADE_DELAY * 10 + id * 0.05}
+              >
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-3">
+                  <h3 className="text-xs font-medium text-muted-foreground sm:w-36 sm:flex-none sm:pt-1">
+                    {group.category}
+                  </h3>
+                  <div className="flex flex-wrap gap-1">
+                    {group.items.map((skill) => (
+                      <Badge key={skill}>{skill}</Badge>
+                    ))}
+                  </div>
+                </div>
               </BlurFade>
             ))}
           </div>
@@ -127,9 +157,9 @@ export default function Page() {
                   Check out my latest work
                 </h2>
                 <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  I&apos;ve worked on a variety of projects, from simple
-                  websites to complex web applications. Here are a few of my
-                  favorites.
+                  From RAG pipelines and LLM-driven background workflows to
+                  fintech platforms, these are products I&apos;ve designed,
+                  built, and shipped end to end.
                 </p>
               </div>
             </div>
@@ -157,6 +187,41 @@ export default function Page() {
         </div>
       </section>
 
+      <section id="achievements">
+        <div className="flex min-h-0 flex-col gap-y-3">
+          <BlurFade delay={BLUR_FADE_DELAY * 14}>
+            <h2 className="text-xl font-bold">
+              Achievements &amp; Certifications
+            </h2>
+          </BlurFade>
+          <BlurFade delay={BLUR_FADE_DELAY * 15}>
+            <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
+              {DATA.achievements.map((item) => (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    {item.title}
+                  </Link>
+                  {item.detail && ` · ${item.detail}`}
+                </li>
+              ))}
+              {DATA.certifications.map((cert) => (
+                <li key={cert.title}>
+                  <span className="font-medium text-foreground">
+                    {cert.title}
+                  </span>
+                  {cert.issuer && ` · ${cert.issuer}`}
+                </li>
+              ))}
+            </ul>
+          </BlurFade>
+        </div>
+      </section>
+
       <section id="contact">
         <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
@@ -168,15 +233,24 @@ export default function Page() {
                 Get in Touch
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Want to chat? Just shoot me a dm{" "}
+                Building with LLMs? Whether it&apos;s a RAG system, an agent,
+                or an AI feature, I&apos;d like to hear about it. Email me at{" "}
                 <Link
-                  href={DATA.contact.social.X.url}
+                  href={DATA.contact.social.email.url}
                   className="text-blue-500 hover:underline"
                 >
-                  with a direct question on twitter
+                  {DATA.contact.email}
                 </Link>{" "}
-                and I&apos;ll respond whenever I can. I will ignore all
-                soliciting.
+                or reach out on{" "}
+                <Link
+                  href={DATA.contact.social.LinkedIn.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  LinkedIn
+                </Link>
+                .
               </p>
             </div>
           </BlurFade>

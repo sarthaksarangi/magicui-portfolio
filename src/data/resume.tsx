@@ -5,52 +5,124 @@ export const DATA = {
   name: "Sarthak Sarangi",
   initials: "SS",
   url: "https://sarthaksarangi.com",
-  location: "Bhubaneswar, India",
-  locationLink: "https://www.google.com/maps/place/Bhubaneswar",
+  location: "Gurugram, India",
+  locationLink: "https://www.google.com/maps/place/Gurugram",
+  title: "Full-Stack AI Engineer",
   description:
-    "Software Engineer building scalable full-stack and backend systems.",
-  summary:
-    "Software Engineer with hands-on experience building production-grade backend and full-stack systems. Currently working at Ericsson on enterprise supply-chain platforms using Oracle Database and PL/SQL, delivering measurable performance and data-quality improvements. Strong experience in React, Node.js, TypeScript, REST APIs, and modern cloud-native tooling.",
+    "Full-Stack AI Engineer. I build RAG systems, LLM agents, and the products around them, with Python and Next.js.",
+  summary: [
+    "I build Generative AI products end to end: the RAG pipeline or agent in Python, the API behind it, and the interface people actually use.",
+    "**What I build.** RAG systems that answer from your own documents with citations, LLM agents and automated workflows, and full-stack apps in Next.js and TypeScript. Recent work includes [DocSage](https://github.com/sarthaksarangi/docsage), a RAG assistant for technical PDFs built on LangChain and pgvector, and [TickrFlow](https://tickr-flow.vercel.app/), which runs a scheduled LLM pipeline to email personalized market summaries.",
+    "**Production experience.** I'm a Software Engineer at [Exotel](https://exotel.com). Before that I was at [Ericsson](https://www.ericsson.com), where I built Java Spring Boot services that synced 10,000+ enterprise product updates a day, automated 30+ hours of manual work a week, and cut bulk upload times from 45s to 15s.",
+    "**Get in touch.** If you're building with LLMs, whether a RAG system, an agent, or an AI feature, I'd like to hear about it. [Email me](mailto:sarthaksarangi.dev@gmail.com).",
+  ].join("\n\n"),
 
   avatarUrl: "/me.png",
 
   highlights: [
-    "Backend Engineer at Ericsson (Enterprise Systems)",
-    "Strong SQL & database optimization background",
-    "Built multiple full-stack systems end-to-end",
+    "Builds Generative AI apps in Python with LangChain, RAG, and vector databases",
+    "Ships full-stack products end to end with Next.js and TypeScript",
+    "Software Engineer at Exotel, previously at Ericsson",
     "Comfortable owning features from design to production",
   ],
 
   skills: [
-    // Core
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Node.js",
-
-    // Backend & APIs
-    "Hono",
-    "Express.js",
-    "REST APIs",
-    "JWT",
-    "Microservices",
-
-    // Databases
-    "PostgreSQL",
-    "Oracle Database",
-    "PL/SQL",
-    "MongoDB",
-    "Prisma",
-
-    // Cloud & DevOps
-    "Docker",
-    "Cloudflare Workers",
-    "CI/CD",
-    "Vercel",
-
-    // Others
-    "Java",
-    "Python",
+    {
+      category: "LLMs & Agents",
+      items: [
+        "LLMs",
+        "Prompt Engineering",
+        "Tool Calling",
+        "Agentic AI",
+        "LangChain",
+        "LangGraph",
+        "MCP",
+        "Hugging Face",
+        "Fine-tuning",
+      ],
+    },
+    {
+      category: "RAG & Retrieval",
+      items: [
+        "RAG",
+        "Embeddings",
+        "Vector Databases",
+        "Semantic Search",
+        "Hybrid Search",
+        "Reranking",
+        "pgvector",
+        "Qdrant",
+      ],
+    },
+    {
+      category: "Evals & Observability",
+      items: [
+        "LLM Evaluation",
+        "RAGAS",
+        "LangSmith",
+        "Tracing",
+        "pytest",
+      ],
+    },
+    {
+      category: "Python",
+      items: [
+        "Python",
+        "FastAPI",
+        "Pydantic",
+        "asyncio",
+        "SQLAlchemy",
+        "SQLModel",
+        "Streamlit",
+        "pandas",
+        "NumPy",
+      ],
+    },
+    {
+      category: "Backend",
+      items: [
+        "Java",
+        "Spring Boot",
+        "Spring Data JPA",
+        "Hibernate",
+        "Node.js",
+        "Express.js",
+        "REST APIs",
+        "Microservices",
+      ],
+    },
+    {
+      category: "Frontend",
+      items: [
+        "TypeScript",
+        "JavaScript",
+        "React",
+        "Next.js",
+        "Tailwind CSS",
+      ],
+    },
+    {
+      category: "Data",
+      items: [
+        "SQL",
+        "PostgreSQL",
+        "Oracle SQL",
+        "MongoDB",
+        "Redis",
+      ],
+    },
+    {
+      category: "Cloud & DevOps",
+      items: [
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "CI/CD",
+        "GitHub Actions",
+        "Git",
+        "Linux",
+      ],
+    },
   ],
 
   navbar: [
@@ -74,6 +146,12 @@ export const DATA = {
         icon: Icons.linkedin,
         navbar: true,
       },
+      LeetCode: {
+        name: "LeetCode",
+        url: "https://leetcode.com/u/sarthaksarangi/",
+        icon: Icons.leetcode,
+        navbar: true,
+      },
       email: {
         name: "Send Email",
         url: "mailto:sarthaksarangi.dev@gmail.com",
@@ -91,6 +169,17 @@ export const DATA = {
 
   work: [
     {
+      company: "Exotel",
+      href: "https://exotel.com",
+      badges: [],
+      location: "Gurugram, India",
+      title: "Software Engineer",
+      logoUrl: "/exotel.svg",
+      start: "Aug 2026",
+      end: "Present",
+      description: "",
+    },
+    {
       company: "Ericsson",
       href: "https://www.ericsson.com",
       badges: [],
@@ -98,21 +187,21 @@ export const DATA = {
       title: "Software Engineer",
       logoUrl: "/ericsson.svg",
       start: "Aug 2024",
-      end: "Present",
+      end: "Aug 2026",
       description:
-        "Backend engineer on an enterprise supply-chain platform serving 1,000+ users. Designed and implemented PL/SQL procedures and Oracle Scheduler jobs integrated with ASP.NET services. Built end-to-end data processing pipelines including validation, transformation, and XML/CLOB parsing. Optimized legacy queries and refactored core modules, improving performance by 30–50% and data accuracy by ~40%.",
+        "Built Java Spring Boot backend services and nightly PL/SQL batch jobs for enterprise product synchronization, with retry and orchestration logic across RESTful APIs supporting 10,000+ product updates daily. Designed rule-based synchronization and validation logic with Spring Boot, Spring Data JPA, and Oracle SQL that automated manual updates and cut operational effort by 30+ hours a week. Resolved N+1 query issues in Spring Data JPA and removed redundant joins in PL/SQL procedures, improving bulk upload performance by 30–50% (45s to 15s) across 100+ daily enterprise operations.",
     },
     {
       company: "Ericsson",
       href: "https://www.ericsson.com",
       badges: ["Internship"],
       location: "Kolkata, India",
-      title: "DevSecOps Intern",
+      title: "Software Engineer Intern",
       logoUrl: "/ericsson.svg",
       start: "Jan 2024",
       end: "Jul 2024",
       description:
-        "Designed and built a full-stack Meal Booking system using Node.js, Express.js, PostgreSQL, and Prisma. Implemented JWT-based role-based access control supporting three user roles. Built RESTful microservices for concurrent usage and developed a React + TypeScript frontend using TanStack Query, reducing redundant API calls by ~40% through caching.",
+        "Led the backend team for a full-stack Meal Booking POC, designing 4 REST microservices (User, Auth, Booking, Ticketing) on Node.js, Express, and PostgreSQL with Prisma ORM, plus a complete JWT auth system with access/refresh token lifecycle and RBAC across 3 user roles. Built the React/TypeScript frontend with a multi-role dashboard, cutting redundant API calls by 40% via Axios interceptors and TanStack Query caching.",
     },
   ],
 
@@ -130,26 +219,82 @@ export const DATA = {
 
   projects: [
     {
-      title: "Pay-X",
-      href: "https://user-payx.sarthaksarangi.com/",
-      dates: "Nov 2024 – Present",
+      title: "DocSage",
+      href: "https://github.com/sarthaksarangi/docsage",
+      dates: "May 2026 – Present",
       active: true,
       description:
-        "Designed and built a TypeScript-first Turborepo monorepo powering a multi-app fintech-style platform. Includes separate Next.js user and merchant apps, a shared UI package, Prisma-backed database, NextAuth authentication, and an independent Express webhook service. Focused on scalable architecture, code reuse, and production-ready developer tooling.",
+        "RAG-based conversational assistant for querying technical PDFs. Ingests and chunks documents, embeds them with Gemini, and runs semantic similarity search with metadata filtering on PostgreSQL + pgvector. Answers are generated by Gemini 2.5 Flash through LangChain and grounded with source citations in a Streamlit chat interface.",
       technologies: [
-        "Next.js (App Router)",
-        "React",
+        "Python",
+        "LangChain",
+        "RAG",
+        "pgvector",
+        "PostgreSQL",
+        "Gemini",
+        "Streamlit",
+        "Docker",
+      ],
+      links: [
+        {
+          type: "Source",
+          href: "https://github.com/sarthaksarangi/docsage",
+          icon: <Icons.github className="size-3" />,
+        },
+      ],
+      image: "/docsage-thumbnail.png",
+      video: "",
+    },
+    {
+      title: "TickrFlow",
+      href: "https://tickr-flow.vercel.app/",
+      dates: "Feb 2026 – Apr 2026",
+      active: false,
+      description:
+        "AI-powered stock market intelligence app with real-time TradingView charts, Finnhub-powered debounced stock search with ISR caching, and watchlists behind Better Auth session-based access control. A daily Inngest background pipeline uses Gemini 2.5 Flash to write personalized market summaries for each user's watchlist and delivers them by email via Nodemailer.",
+      technologies: [
+        "Next.js",
+        "TypeScript",
+        "Gemini AI",
+        "Inngest",
+        "MongoDB",
+        "Better Auth",
+        "Finnhub",
+        "Nodemailer",
+      ],
+      links: [
+        {
+          type: "Website",
+          href: "https://tickr-flow.vercel.app/",
+          icon: <Icons.globe className="size-3" />,
+        },
+        {
+          type: "Source",
+          href: "https://github.com/sarthaksarangi/tickr-flow",
+          icon: <Icons.github className="size-3" />,
+        },
+      ],
+      image: "/tickrflow.png",
+      video: "",
+    },
+    {
+      title: "Pay-X",
+      href: "https://user-payx.sarthaksarangi.com/",
+      dates: "Oct 2025 – Jan 2026",
+      active: false,
+      description:
+        "Fintech payment platform built as a TypeScript Turborepo monorepo: a Next.js user dashboard, merchant portal, and Express webhook microservice over a shared Prisma/PostgreSQL data layer, with NextAuth supporting Google, GitHub, and phone/password login. Atomic database transactions and idempotency keys prevent double-spending on concurrent P2P transfers. Containerized with Docker and deployed through a CI/CD pipeline.",
+      technologies: [
+        "Next.js",
         "TypeScript",
         "Turborepo",
+        "Express",
+        "PostgreSQL",
         "Prisma",
         "NextAuth",
-        "TailwindCSS",
-        "PostgreSQL",
-        "Express",
+        "Docker",
+        "CI/CD",
         "Chart.js",
-        "Framer Motion",
-        "Recoil",
-        "Node.js",
       ],
       links: [
         {
@@ -167,14 +312,13 @@ export const DATA = {
         "https://res.cloudinary.com/dp3mmxvqb/image/upload/v1763058357/Screenshot_2025-11-13_at_11.46.10_PM_yzt921.png",
       video: "",
     },
-
     {
       title: "Blogify",
-      href: "#",
+      href: "https://blogify.sarthaksarangi.com",
       dates: "Jan 2025 – Apr 2025",
       active: false,
       description:
-        "Designed and built a production-ready blogging platform with multi-user support. Implemented JWT authentication, role-based access, and CRUD workflows using React + TypeScript and a serverless Hono backend on Cloudflare Workers. Integrated Tiptap editor and Cloudinary image optimization, reducing media payload sizes by 60–80%.",
+        "Multi-user blogging platform with JWT authentication, role-based access, and CRUD workflows, built with React + TypeScript and a serverless Hono backend on Cloudflare Workers. Integrated the Tiptap editor and Cloudinary image optimization, reducing media payload sizes by 60–80%.",
       technologies: [
         "React",
         "TypeScript",
@@ -200,48 +344,29 @@ export const DATA = {
         "https://res.cloudinary.com/dp3mmxvqb/image/upload/v1763064588/Screenshot_2025-11-14_at_1.25.58_AM_gncynz.png",
       video: "",
     },
-    {
-      title: "MockPay",
-      href: "https://github.com/sarthaksarangi/payment-app",
-      dates: "Jun 2024 – Aug 2024",
-      active: false,
-      description:
-        "Engineered a secure peer-to-peer payment system using the MERN stack. Implemented JWT-based authentication, role-based permissions, wallet management, and transaction history. Optimized MongoDB queries using indexing to support real-time transfers across 50+ test accounts.",
-      technologies: ["MongoDB", "Express.js", "React", "Node.js", "JWT"],
-      links: [
-        {
-          type: "Source",
-          href: "https://github.com/sarthaksarangi/payment-app",
-          icon: <Icons.github className="size-3" />,
-        },
-      ],
-      image: "",
-      video: "",
-    },
-    {
-      title: "AI Keyword Extractor",
-      href: "https://github.com/sarthaksarangi/keyword-extractor-openai",
-      dates: "Mar 2024 – Apr 2024",
-      active: false,
-      description:
-        "Built a React-based AI tool integrating OpenAI GPT APIs to extract 5–15 contextually relevant keywords from long-form text. Designed efficient prompt workflows and optimized API usage to handle documents up to 2,000 words with predictable latency.",
-      technologies: ["React", "TypeScript", "OpenAI API", "Chakra UI"],
-      links: [
-        {
-          type: "Source",
-          href: "https://github.com/sarthaksarangi/keyword-extractor-openai",
-          icon: <Icons.github className="size-3" />,
-        },
-      ],
-      image: "",
-      video: "",
-    },
   ],
 
   achievements: [
-    "Solved 450+ LeetCode problems (Top 15%)",
-    "HackerRank SQL – 5 Star",
-    "Strong foundation in Data Structures & Algorithms",
-    "Oracle SQL & Full-Stack Web Development certified",
+    {
+      title: "450+ problems solved on LeetCode",
+      detail: "Top 15%",
+      href: "https://leetcode.com/u/sarthaksarangi/",
+    },
+    {
+      title: "HackerRank SQL 5-Star",
+      detail: "",
+      href: "https://www.hackerrank.com/sarthaksarangi",
+    },
+  ],
+
+  certifications: [
+    {
+      title: "LangChain for LLM Application Development",
+      issuer: "DeepLearning.AI",
+    },
+    {
+      title: "Oracle SQL & Database Design",
+      issuer: "",
+    },
   ],
 } as const;

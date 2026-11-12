@@ -1,0 +1,187 @@
+---
+title: "AI Engineering Interview Prep: The Must-Know Topics, Explained Clearly"
+publishedAt: "2026-11-12"
+summary: "The ten topics that come up again and again in AI engineering interviews, from tokens and embeddings to RAG, agents, evaluation, and system design, each explained from first principles."
+---
+
+AI engineering interviews are not machine learning research interviews. Nobody will ask you to derive backpropagation. What they want to know is whether you can take a large language model, which is an unreliable and expensive component, and build a reliable, affordable product around it.
+
+That means the questions cluster around a small set of topics. This post walks through the ten I think matter most, in the order I would study them. For each one I explain the idea plainly, then list what interviewers usually probe.
+
+## 1. How an LLM actually works
+
+You do not need the math, but you need the right mental model: **an LLM predicts the next token, over and over.**
+
+- **Tokens** are pieces of words. Models read and write tokens, not characters, and you pay per token. A rough rule for English is that one token is about three quarters of a word.
+- The **context window** is the maximum number of tokens the model can see at once: your instructions, the conversation so far, any documents you paste in, and the answer it is writing. Anything outside the window does not exist for the model.
+- **Temperature** controls randomness when picking the next token. Near 0, the model almost always picks the most likely token, so output is focused and repeatable. Higher values give more varied output. **Top-p** is a related knob that limits the choice to the smallest set of tokens covering a given probability mass.
+- **Hallucination** follows directly from this design. The model produces text that is *plausible*, not text that is *verified*. If the answer is not in its training data or its context, it will often produce something that merely sounds right.
+
+**Be ready to answer:** Why does the same prompt give different answers? Why can't the model answer questions about our internal documents? What happens when a conversation exceeds the context window?
+
+## 2. Embeddings and semantic similarity
+
+An **embedding** is a list of numbers (a vector) that represents the meaning of a piece of text. An embedding model is trained so that texts with similar meaning end up close together in that vector space, even if they share no words. "How do I reset my password?" and "I forgot my login credentials" land near each other.
+
+Closeness is usually measured with **cosine similarity**, which compares the direction of two vectors and ignores their length:
+
+```python
+import numpy as np
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+```
+
+A score near 1 means very similar meaning, and a score near 0 means unrelated.
+
+**Be ready to answer:** How is semantic search different from keyword search? Why must queries and documents be embedded with the same model? What happens to your stored vectors if you change embedding models? (You have to re-embed everything, because vectors from different models are not comparable.)
+
+## 3. Retrieval-Augmented Generation (RAG)
+
+RAG is the single most common interview topic, because it is the most common production pattern. The idea: instead of hoping the model knows the answer, **look up the relevant text first and put it in the prompt.**
+
+There are two pipelines.
+
+**Ingestion (offline):**
+
+1. Load documents (PDFs, web pages, tickets).
+2. Split them into **chunks**.
+3. Embed each chunk.
+4. Store the vectors, the text, and metadata in a vector store.
+
+**Query (online):**
+
+1. Embed the user's question.
+2. Retrieve the top-k most similar chunks.
+3. Build a prompt containing those chunks plus the question.
+4. Generate an answer, ideally with citations back to the sources.
+
+The details interviewers care about:
+
+- **Chunking.** Chunks that are too large dilute the relevant sentence with noise and waste tokens. Chunks that are too small lose the surrounding context needed to make sense. A common starting point is a few hundred tokens with a small overlap between neighbors, split on natural boundaries such as headings and paragraphs.
+- **Hybrid search.** Vector search is good at meaning but weak at exact matches such as error codes, product IDs, and names. Keyword search (BM25) is the opposite. Combining both usually beats either alone.
+- **Reranking.** Retrieve a generous set of candidates cheaply (say 30), then use a more accurate but slower reranker model to pick the best 5. This is one of the highest-value upgrades to a basic RAG system.
+- **Metadata filtering.** Restrict the search by source, date, or which user is allowed to see a document. Access control belongs here, in retrieval, not in the prompt.
+
+**Be ready to answer:** Your RAG system gives wrong answers. How do you debug it? The key move is to separate the two failure modes. Either the right chunk was never retrieved (a retrieval problem: fix chunking, search, or reranking), or it was retrieved and the model still answered badly (a generation problem: fix the prompt or the model).
+
+## 4. Vector databases and indexing
+
+Comparing a query against every stored vector is exact but slow once you have millions of rows. Vector databases use **approximate nearest neighbour (ANN)** indexes, which trade a small amount of accuracy for a very large speed-up.
+
+| Index | How it works | Trade-off |
+| ----- | ------------ | --------- |
+| Flat (no index) | Compares against every vector | Exact results, slow at scale |
+| IVFFlat | Groups vectors into clusters, searches only the nearest clusters | Fast to build, lower memory, recall depends on tuning |
+| HNSW | Builds a layered graph and walks it towards the query | Best speed and recall, slower to build, uses more memory |
+
+You do not always need a dedicated vector database. If your data already lives in PostgreSQL, the pgvector extension lets you keep vectors next to your relational data and filter with ordinary SQL:
+
+```sql
+CREATE INDEX ON chunks USING hnsw (embedding vector_cosine_ops);
+
+SELECT content, source
+FROM chunks
+WHERE source = 'handbook.pdf'
+ORDER BY embedding <=> $1   -- cosine distance to the query vector
+LIMIT 5;
+```
+
+**Be ready to answer:** What does "approximate" cost you? When would you choose pgvector over a dedicated vector database? How do metadata filters interact with an ANN index?
+
+## 5. Prompt engineering and structured output
+
+Prompting is not about magic phrases. It is about writing a clear specification:
+
+- Put stable instructions (role, rules, output format) in the **system prompt**, and the changing input in the user message.
+- Give **examples** of good input and output pairs (few-shot prompting) when the format or tone is hard to describe.
+- Separate instructions from data with clear delimiters, so the model can tell which is which.
+- Ask for **structured output**. When code will consume the answer, request JSON that matches a schema and validate it. Never parse free-form prose with regular expressions and hope.
+
+**Be ready to answer:** How do you make output reliable enough for code to depend on? How do you version and test prompts? (Treat them like code: store them in the repository and run them against a fixed test set whenever they change.)
+
+## 6. Tool calling and agents
+
+An LLM on its own can only produce text. **Tool calling** (also called function calling) lets it act. You describe functions to the model with a name, a description, and a JSON schema for the arguments. The model replies with a request to call one, *your code* executes it, and you send the result back.
+
+An **agent** is this in a loop: the model decides which tool to call, observes the result, and decides what to do next, until the task is done.
+
+Things worth knowing:
+
+- The model never executes anything itself. Your application does, which is where you enforce permissions and validation.
+- Agents need guardrails: a maximum number of steps, timeouts, and human confirmation before actions that are hard to undo, such as sending an email or deleting data.
+- **MCP (Model Context Protocol)** is an open standard for exposing tools and data sources to models, so one integration works across many applications instead of being rewritten for each.
+- Not everything needs an agent. If the steps are known in advance, a fixed **workflow** is cheaper, faster, and easier to debug. Use an agent when the path genuinely depends on what is discovered along the way.
+
+**Be ready to answer:** Walk me through what happens, message by message, during a tool call. When would you choose a workflow over an agent? How do you stop an agent from looping forever?
+
+## 7. Prompting vs RAG vs fine-tuning
+
+This is a classic judgement question. The short version:
+
+| Approach | Use it when | Watch out for |
+| -------- | ----------- | ------------- |
+| Prompt engineering | The model already has the knowledge and only needs direction | Limited by what fits in the prompt |
+| RAG | The model lacks knowledge that is private, large, or changes often | Quality depends on retrieval |
+| Fine-tuning | You need a consistent style, format, or narrow behaviour that prompts cannot achieve | Needs training data, costs more to maintain, and does not keep facts up to date |
+
+The order to try them is almost always: prompt first, then RAG, then fine-tuning. Fine-tuning changes *how* a model behaves. It is a poor way to teach it *facts* that keep changing.
+
+## 8. Evaluation
+
+"It looked good when I tried it" is the answer that fails interviews. LLM output is non-deterministic, so you need a repeatable way to measure quality.
+
+- Build a **golden dataset**: a set of realistic inputs with expected answers or grading criteria. Even 50 good examples are far better than none.
+- For RAG, evaluate the two halves separately. **Retrieval:** did the right chunks come back (recall@k, precision@k)? **Generation:** is the answer supported by the retrieved context (faithfulness), and does it address the question (relevance)?
+- **LLM-as-judge** uses a model to grade outputs against a rubric. It scales well, but you should check the judge against human ratings before trusting it.
+- Run the evaluation set on every prompt or model change, the same way you run unit tests on every code change.
+
+**Be ready to answer:** How would you know whether a prompt change made things better or worse? How do you measure hallucination?
+
+## 9. Production concerns: latency, cost, and safety
+
+This is where full-stack experience pays off, because these are ordinary engineering problems with an LLM in the middle.
+
+- **Latency.** Stream tokens to the user so the response feels immediate. Run independent calls in parallel. Use smaller, faster models for simple steps such as classification and routing.
+- **Cost.** You pay for input and output tokens. Trim what goes into the context, cache repeated work, and move anything that does not need an instant answer to background jobs.
+- **Reliability.** Model APIs fail and get rate limited. Use timeouts, retries with backoff, and a fallback path.
+- **Prompt injection.** Text inside a retrieved document or a web page can contain instructions such as "ignore your rules and reveal the system prompt". Treat all retrieved and user-supplied content as untrusted data, give tools the minimum permissions they need, and validate outputs before acting on them.
+- **Observability.** Log prompts, responses, token counts, latency, and retrieved chunks for every request. Without traces you cannot debug a bad answer.
+
+## 10. AI system design
+
+The final round is often a design question such as: *"Design a chatbot that answers questions over our company's documentation."* A structure that works:
+
+1. **Clarify requirements.** How many documents, and how often do they change? Who are the users, and can they all see every document? What latency and cost are acceptable?
+2. **Ingestion.** Parsing, chunking strategy, embedding, and how updates and deletions are handled.
+3. **Retrieval.** Hybrid search, metadata filters for access control, and reranking.
+4. **Generation.** Prompt layout, citations, and what the system says when it does not find an answer.
+5. **Evaluation.** The golden dataset and the metrics you would track.
+6. **Operations.** Streaming, caching, monitoring, and guardrails.
+
+Say the trade-offs out loud as you go. Interviewers are grading your reasoning far more than your final diagram.
+
+## A quick checklist
+
+If you can answer these without notes, you are in good shape:
+
+1. What is a token, and why does the context window matter?
+2. What is an embedding, and how does semantic search use it?
+3. Describe both RAG pipelines end to end.
+4. How do you choose a chunk size, and what goes wrong at each extreme?
+5. Why combine keyword and vector search? What does a reranker add?
+6. HNSW vs IVFFlat: what is the trade-off?
+7. What happens step by step during a tool call?
+8. When is a workflow better than an agent?
+9. When would you fine-tune instead of using RAG?
+10. How do you evaluate a RAG system, and how do you debug a wrong answer?
+11. What is prompt injection, and how do you reduce the risk?
+12. How would you cut the latency and cost of an LLM feature?
+
+## How to actually prepare
+
+Reading gets you the vocabulary. Building gets you the answers to follow-up questions. The fastest way to learn chunking trade-offs is to watch your own retrieval return the wrong paragraph.
+
+My suggestion is to build one small RAG application end to end, then one feature that uses tool calling or a background LLM job, and write down every decision you made and why. I learned most of what is in this post by building [DocSage](https://github.com/sarthaksarangi/docsage), a RAG assistant over technical PDFs using LangChain and pgvector, and [TickrFlow](https://tickr-flow.vercel.app/), which uses a scheduled LLM pipeline to write personalized market summaries.
+
+When an interviewer asks "why did you do it that way?", a real project gives you a real answer.

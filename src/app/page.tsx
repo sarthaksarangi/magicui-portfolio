@@ -6,7 +6,7 @@ import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DATA } from "@/data/resume";
-import { MapPinIcon } from "lucide-react";
+import { FileTextIcon, MapPinIcon } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import Markdown from "react-markdown";
@@ -45,6 +45,13 @@ export default function Page() {
                   >
                     <MapPinIcon className="size-3.5" />
                     {DATA.location}
+                  </Link>
+                  <Link
+                    href="/resume"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-3 py-1 font-medium text-background hover:opacity-90"
+                  >
+                    <FileTextIcon className="size-3.5" />
+                    Resume
                   </Link>
                 </div>
               </BlurFade>

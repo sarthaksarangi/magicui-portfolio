@@ -1,5 +1,5 @@
 import { Icons } from "@/components/icons";
-import { HomeIcon, NotebookIcon } from "lucide-react";
+import { FileTextIcon, HomeIcon, NotebookIcon } from "lucide-react";
 
 export const DATA = {
   name: "Sarthak Sarangi",
@@ -12,17 +12,20 @@ export const DATA = {
     "Full-Stack AI Engineer. I build RAG systems, LLM agents, and the products around them, with Python and Next.js.",
   summary: [
     "I build Generative AI products end to end: the RAG pipeline or agent in Python, the API behind it, and the interface people actually use.",
-    "**What I build.** RAG systems that answer from your own documents with citations, LLM agents and automated workflows, and full-stack apps in Next.js and TypeScript. Recent work includes [DocSage](https://github.com/sarthaksarangi/docsage), a RAG assistant for technical PDFs built on LangChain and pgvector, and [TickrFlow](https://tickr-flow.vercel.app/), which runs a scheduled LLM pipeline to email personalized market summaries.",
-    "**Production experience.** I'm a Software Engineer at [Exotel](https://exotel.com). Before that I was at [Ericsson](https://www.ericsson.com), where I built Java Spring Boot services that synced 10,000+ enterprise product updates a day, automated 30+ hours of manual work a week, and cut bulk upload times from 45s to 15s.",
+    "**What I build.** RAG systems that answer from your own documents with citations, LLM agents and automated workflows, and full-stack apps in Next.js and TypeScript. Recent work includes [DocSage](https://github.com/sarthaksarangi/docsage), a RAG assistant for technical PDFs built on LangChain and pgvector, and [TickrFlow](https://tickrflow.sarthaksarangi.com/), which runs a scheduled LLM pipeline to email personalized market summaries.",
+    "**Production experience.** I'm a Software Engineer at [Exotel](https://exotel.com), where I've built LLM-powered automation with FastAPI and Pydantic, including a platform that turns report customization requests into explained, ready-to-apply changes. Before that I was at [Ericsson](https://www.ericsson.com), where I built Java Spring Boot services that synced 10,000+ enterprise product updates a day, automated 30+ hours of manual work a week, and cut bulk upload times from 45s to 15s.",
     "**Get in touch.** If you're building with LLMs, whether a RAG system, an agent, or an AI feature, I'd like to hear about it. [Email me](mailto:sarthaksarangi.dev@gmail.com).",
   ].join("\n\n"),
+
+  resumeSummary:
+    "Full-Stack AI Engineer building LLM-powered automation and applications with Python and FastAPI. Software Engineer at Exotel, previously at Ericsson; experienced in RAG pipelines, LLM workflows, Spring Boot services, and Next.js front ends.",
 
   avatarUrl: "/me.png",
 
   highlights: [
     "Builds Generative AI apps in Python with LangChain, RAG, and vector databases",
     "Ships full-stack products end to end with Next.js and TypeScript",
-    "Software Engineer at Exotel, previously at Ericsson",
+    "Software Engineer at Exotel building AI automation with FastAPI; previously at Ericsson",
     "Comfortable owning features from design to production",
   ],
 
@@ -128,6 +131,7 @@ export const DATA = {
   navbar: [
     { href: "/", icon: HomeIcon, label: "Home" },
     { href: "/blog", icon: NotebookIcon, label: "Blog" },
+    { href: "/resume", icon: FileTextIcon, label: "Resume" },
   ],
 
   contact: {
@@ -177,7 +181,15 @@ export const DATA = {
       logoUrl: "/exotel.svg",
       start: "Aug 2026",
       end: "Present",
-      description: "",
+      description:
+        "Built an LLM-powered automation platform with Python, FastAPI, and Pydantic that turns a statement of work and a JRXML report template into a ready-to-apply customized call report, replacing a manual engineering workflow. Designed it to convert each request into a standard requirement template, ask clarifying questions and score feasibility until the requirement is workable, and send the LLM only the relevant parts of the template, with Pydantic validating the output at every step. Added an explanation of every change (what, why, and how) beside a side-by-side comparison, with human approval required before anything is applied. Evaluated output quality with an LLM-as-judge and tests against a golden dataset, and used the results to refine the tool's knowledge base. Also delivered voice bot integrations with IVR, Next.js interfaces, middleware, and wrapper APIs.",
+      bullets: [
+        "Engineered an **LLM-powered automation platform** with **Python**, **FastAPI**, and **Pydantic** that turns a statement of work and a **JRXML** report template into a ready-to-apply customized call report, replacing a manual engineering workflow.",
+        "Designed a **requirement-extraction pipeline** that normalizes each request into a standard template, validates LLM output at every step with **Pydantic**, and sends the LLM only the relevant template fragments, never the full file.",
+        "Built an **interactive clarification loop** with a **feasibility score** and **human-in-the-loop approval**: the app asks targeted questions until a requirement is implementable, explains every change (**what, why, and how**) beside a **side-by-side diff**, and applies nothing until the user approves.",
+        "Evaluated output quality with an **LLM-as-judge** and tests against a **golden dataset**, using the results to curate the tool's **knowledge base** of text and Markdown files.",
+        "Delivered **voice bot integrations with IVR**, **Next.js** interfaces, middleware, and wrapper APIs.",
+      ],
     },
     {
       company: "Ericsson",
@@ -190,6 +202,11 @@ export const DATA = {
       end: "Aug 2026",
       description:
         "Built Java Spring Boot backend services and nightly PL/SQL batch jobs for enterprise product synchronization, with retry and orchestration logic across RESTful APIs supporting 10,000+ product updates daily. Designed rule-based synchronization and validation logic with Spring Boot, Spring Data JPA, and Oracle SQL that automated manual updates and cut operational effort by 30+ hours a week. Resolved N+1 query issues in Spring Data JPA and removed redundant joins in PL/SQL procedures, improving bulk upload performance by 30–50% (45s to 15s) across 100+ daily enterprise operations.",
+      bullets: [
+        "Built **Java Spring Boot** backend services and nightly PL/SQL batch jobs for enterprise product synchronization, with retry and orchestration logic across RESTful APIs supporting **10,000+** product updates daily.",
+        "Designed rule-based synchronization and validation logic with **Spring Boot**, **Spring Data JPA**, and Oracle SQL that automated manual updates, cutting operational effort by **30+ hours weekly**.",
+        "Resolved N+1 query issues in **Spring Data JPA** and removed redundant joins in PL/SQL procedures, improving bulk upload performance by **30–50% (45s to 15s)** across 100+ daily enterprise operations.",
+      ],
     },
     {
       company: "Ericsson",
@@ -202,6 +219,10 @@ export const DATA = {
       end: "Jul 2024",
       description:
         "Led the backend team for a full-stack Meal Booking POC, designing 4 REST microservices (User, Auth, Booking, Ticketing) on Node.js, Express, and PostgreSQL with Prisma ORM, plus a complete JWT auth system with access/refresh token lifecycle and RBAC across 3 user roles. Built the React/TypeScript frontend with a multi-role dashboard, cutting redundant API calls by 40% via Axios interceptors and TanStack Query caching.",
+      bullets: [
+        "Led the backend team for a **full-stack Meal Booking POC**, designing 4 REST microservices (User, Auth, Booking, Ticketing) on **Node.js/Express/PostgreSQL** with Prisma ORM and JWT auth with access/refresh tokens and RBAC across 3 user roles.",
+        "Built the **React/TypeScript** frontend with a multi-role dashboard, cutting redundant API calls by **40%** via TanStack Query caching.",
+      ],
     },
   ],
 
@@ -225,6 +246,9 @@ export const DATA = {
       active: true,
       description:
         "RAG-based conversational assistant for querying technical PDFs. Ingests and chunks documents, embeds them with Gemini, and runs semantic similarity search with metadata filtering on PostgreSQL + pgvector. Answers are generated by Gemini 2.5 Flash through LangChain and grounded with source citations in a Streamlit chat interface.",
+      bullets: [
+        "Developed a **RAG-based conversational assistant** for technical PDFs using **LangChain** and **Gemini 2.5 Flash**, with **pgvector** semantic search, metadata filtering, and citation-grounded answers in a **Streamlit** interface.",
+      ],
       technologies: [
         "Python",
         "LangChain",
@@ -247,11 +271,15 @@ export const DATA = {
     },
     {
       title: "TickrFlow",
-      href: "https://tickr-flow.vercel.app/",
+      href: "https://tickrflow.sarthaksarangi.com/",
       dates: "Feb 2026 – Apr 2026",
       active: false,
       description:
         "AI-powered stock market intelligence app with real-time TradingView charts, Finnhub-powered debounced stock search with ISR caching, and watchlists behind Better Auth session-based access control. A daily Inngest background pipeline uses Gemini 2.5 Flash to write personalized market summaries for each user's watchlist and delivers them by email via Nodemailer.",
+      bullets: [
+        "Built an **AI-powered stock market intelligence application** with real-time **TradingView** charts, **Finnhub**-powered debounced stock search with **ISR caching**, and watchlists behind **Better Auth** session-based access control.",
+        "Automated a **daily news pipeline** using **Inngest** background jobs and **Gemini 2.5 Flash**, generating personalized market summaries for each user's watchlist and delivering them via **Nodemailer**.",
+      ],
       technologies: [
         "Next.js",
         "TypeScript",
@@ -265,7 +293,7 @@ export const DATA = {
       links: [
         {
           type: "Website",
-          href: "https://tickr-flow.vercel.app/",
+          href: "https://tickrflow.sarthaksarangi.com/",
           icon: <Icons.globe className="size-3" />,
         },
         {
@@ -284,6 +312,10 @@ export const DATA = {
       active: false,
       description:
         "Fintech payment platform built as a TypeScript Turborepo monorepo: a Next.js user dashboard, merchant portal, and Express webhook microservice over a shared Prisma/PostgreSQL data layer, with NextAuth supporting Google, GitHub, and phone/password login. Atomic database transactions and idempotency keys prevent double-spending on concurrent P2P transfers. Containerized with Docker and deployed through a CI/CD pipeline.",
+      bullets: [
+        "Architected a **fintech payment platform** as a **TypeScript Turborepo monorepo**: a Next.js user dashboard, merchant portal, and **Express webhook microservice** over a shared **Prisma/PostgreSQL** data layer with **NextAuth** login.",
+        "Implemented **atomic database transactions** and **idempotency keys** to prevent double-spending on concurrent P2P transfers; containerized with **Docker** and deployed via a **CI/CD** pipeline.",
+      ],
       technologies: [
         "Next.js",
         "TypeScript",
@@ -319,6 +351,7 @@ export const DATA = {
       active: false,
       description:
         "Multi-user blogging platform with JWT authentication, role-based access, and CRUD workflows, built with React + TypeScript and a serverless Hono backend on Cloudflare Workers. Integrated the Tiptap editor and Cloudinary image optimization, reducing media payload sizes by 60–80%.",
+      bullets: [],
       technologies: [
         "React",
         "TypeScript",

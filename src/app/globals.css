@@ -142,3 +142,22 @@ code[data-line-numbers-max-digits="2"] > [data-line]::before {
 code[data-line-numbers-max-digits="3"] > [data-line]::before {
   width: 3rem;
 }
+/* Print: light colours, full-width page, no site chrome (used by /resume). */
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm 11mm;
+  }
+  :root,
+  .dark {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
+    --muted-foreground: 0 0% 28%;
+    --border: 0 0% 70%;
+    color-scheme: light;
+  }
+  body {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+}

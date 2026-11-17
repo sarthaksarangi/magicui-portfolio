@@ -24,6 +24,10 @@ export const metadata: Metadata = {
 
   description: DATA.description,
 
+  // Each page's canonical URL is its own path on metadataBase, so links
+  // with tracking parameters (?utm_source=...) are not seen as duplicates.
+  alternates: { canonical: "./" },
+
   keywords: [
     "Generative AI Engineer",
     "Full-Stack AI Engineer",

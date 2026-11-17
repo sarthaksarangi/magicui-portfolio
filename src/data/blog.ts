@@ -15,6 +15,7 @@ import { remarkCallouts, remarkMermaid } from "@/lib/remark-blog";
 export type Metadata = {
   title: string;
   publishedAt: string;
+  updatedAt?: string; // set when a post is revised; defaults to publishedAt
   summary: string;
   image?: string;
   tags?: string[];

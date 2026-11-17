@@ -100,7 +100,8 @@ export default async function Blog({
             "@type": "BlogPosting",
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
+            dateModified:
+              post.metadata.updatedAt ?? post.metadata.publishedAt,
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${DATA.url}${post.metadata.image}`
@@ -109,10 +110,25 @@ export default async function Blog({
             ...(post.metadata.tags
               ? { keywords: post.metadata.tags.join(", ") }
               : {}),
+            mainEntityOfPage: `${DATA.url}/blog/${post.slug}`,
             author: {
               "@type": "Person",
               name: DATA.name,
+              url: DATA.url,
             },
+            // Series membership: "part N of AI Engineering, Explained".
+            ...(series && parts.length > 0
+              ? {
+                  isPartOf: {
+                    "@type": "CreativeWorkSeries",
+                    name: series,
+                    url: `${DATA.url}/blog/${parts[0].slug}`,
+                  },
+                  ...(post.metadata.seriesOrder
+                    ? { position: post.metadata.seriesOrder }
+                    : {}),
+                }
+              : {}),
           }),
         }}
       />

@@ -21,6 +21,9 @@ export type SeriesCardProps = {
   sections?: SeriesSection[];
   // Shown instead of the progress bar on posts outside a series.
   summary?: string;
+  // Header overrides for cards that are not posts (e.g. topic pages).
+  kicker?: string; // left, default: series name or "Blog"
+  badge?: string; // right, default: "Part N of M" / "M parts"
 };
 
 const color = {
@@ -92,15 +95,27 @@ function Progress({
 }
 
 export function SeriesCard(props: SeriesCardProps) {
-  const { title, site, meta, series, part, totalParts, sections, summary } =
-    props;
+  const {
+    title,
+    site,
+    meta,
+    series,
+    part,
+    totalParts,
+    sections,
+    summary,
+    kicker,
+    badge,
+  } = props;
   const size = titleSize(title);
 
-  const right = part
-    ? `Part ${part} of ${totalParts}`
-    : series
-      ? `${totalParts} parts`
-      : "";
+  const right =
+    badge ??
+    (part
+      ? `Part ${part} of ${totalParts}`
+      : series
+        ? `${totalParts} parts`
+        : "");
 
   return (
     <div
@@ -128,7 +143,7 @@ export function SeriesCard(props: SeriesCardProps) {
           color: color.muted,
         }}
       >
-        <div>{series ?? "Blog"}</div>
+        <div>{kicker ?? series ?? "Blog"}</div>
         <div style={{ color: color.fg }}>{right}</div>
       </div>
 

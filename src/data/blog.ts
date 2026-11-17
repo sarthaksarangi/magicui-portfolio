@@ -104,11 +104,6 @@ function getMDXFiles(dir: string) {
   return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx");
 }
 
-export async function markdownToHTML(markdown: string) {
-  const { html } = await markdownToHTMLWithToc(markdown);
-  return html;
-}
-
 export async function markdownToHTMLWithToc(markdown: string, slug = "") {
   const toc: TocItem[] = [];
   const p = await unified()
@@ -154,25 +149,6 @@ export async function getPost(slug: string) {
     slug,
     readingMinutes: readingMinutes(rawContent),
   };
-}
-
-async function getAllPosts(dir: string) {
-  let mdxFiles = getMDXFiles(dir);
-  return Promise.all(
-    mdxFiles.map(async (file) => {
-      let slug = path.basename(file, path.extname(file));
-      let { metadata, source } = await getPost(slug);
-      return {
-        metadata,
-        slug,
-        source,
-      };
-    }),
-  );
-}
-
-export async function getBlogPosts() {
-  return getAllPosts(path.join(process.cwd(), "content"));
 }
 
 function readingMinutes(markdown: string) {

@@ -6,6 +6,7 @@ import {
   SeriesPager,
   SeriesProgress,
 } from "@/components/series-nav";
+import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
 import { TopicChips } from "@/components/topic-links";
 import { getPost, getPostsMeta, getSeriesPosts } from "@/data/blog";
@@ -148,6 +149,12 @@ export default async function Blog({
       <MermaidDiagrams />
       <CodeCopyButtons />
       <TopicChips tags={post.metadata.tags} className="mt-10 max-w-[650px]" />
+      <div className="mt-6">
+        <ShareButtons
+          url={`${DATA.url}/blog/${post.slug}`}
+          title={post.metadata.title}
+        />
+      </div>
       {series && parts.length > 0 ? (
         <SeriesPager post={meta} parts={parts} />
       ) : null}

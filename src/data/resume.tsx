@@ -21,7 +21,7 @@ export const DATA = {
   resumeSummary:
     "Full-Stack AI Engineer building LLM-powered automation and applications with Python and FastAPI. Software Engineer at Exotel, previously at Ericsson; experienced in RAG pipelines, LLM workflows, Spring Boot services, and Next.js front ends.",
 
-  avatarUrl: "/me.png",
+  avatarUrl: "/me.webp",
 
   highlights: [
     "Builds Generative AI apps in Python with LangChain, RAG, and vector databases",

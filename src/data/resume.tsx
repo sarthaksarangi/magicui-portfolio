@@ -202,11 +202,11 @@ export const DATA = {
       start: "Aug 2024",
       end: "Aug 2026",
       description:
-        "Built Java Spring Boot backend services and nightly PL/SQL batch jobs for enterprise product synchronization, with retry and orchestration logic across RESTful APIs supporting 10,000+ product updates daily. Designed rule-based synchronization and validation logic with Spring Boot, Spring Data JPA, and Oracle SQL that automated manual updates and cut operational effort by 30+ hours a week. Resolved N+1 query issues in Spring Data JPA and removed redundant joins in PL/SQL procedures, improving bulk upload performance by 30–50% (45s to 15s) across 100+ daily enterprise operations.",
+        "Built Java Spring Boot backend services and nightly PL/SQL batch jobs for enterprise product synchronization, with retry and orchestration logic across RESTful APIs supporting 10,000+ product updates daily. Designed rule-based synchronization and validation logic with Spring Boot, Spring Data JPA, and Oracle SQL that automated manual updates and cut operational effort by 30+ hours a week. Resolved N+1 query issues in Spring Data JPA and removed redundant joins in PL/SQL procedures, cutting bulk upload time from 45s to 15s across 100+ daily enterprise operations.",
       bullets: [
         "Built **Java Spring Boot** backend services and nightly PL/SQL batch jobs for enterprise product synchronization, with retry and orchestration logic across RESTful APIs supporting **10,000+** product updates daily.",
         "Designed rule-based synchronization and validation logic with **Spring Boot**, **Spring Data JPA**, and Oracle SQL that automated manual updates, cutting operational effort by **30+ hours weekly**.",
-        "Resolved N+1 query issues in **Spring Data JPA** and removed redundant joins in PL/SQL procedures, improving bulk upload performance by **30–50% (45s to 15s)** across 100+ daily enterprise operations.",
+        "Resolved N+1 query issues in **Spring Data JPA** and removed redundant joins in PL/SQL procedures, cutting bulk upload time from **45s to 15s** across 100+ daily enterprise operations.",
       ],
     },
     {

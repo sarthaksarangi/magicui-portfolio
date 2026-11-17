@@ -17,6 +17,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+// Only the posts listed by generateStaticParams exist; any other slug is a
+// 404 instead of a failed attempt to read content/<slug>.mdx (a 500).
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   return getPostsMeta().map((post) => ({ slug: post.slug }));
 }

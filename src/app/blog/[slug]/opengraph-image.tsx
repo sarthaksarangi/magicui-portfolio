@@ -15,6 +15,7 @@ import { ImageResponse } from "next/og";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 export const alt = "Blog post preview";
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return getPostsMeta().map((p) => ({ slug: p.slug }));

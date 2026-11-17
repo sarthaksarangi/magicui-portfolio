@@ -53,6 +53,25 @@ function rehypeExternalLinks() {
   return (tree: any) => visit(tree);
 }
 
+// Wrap tables so wide ones scroll sideways instead of widening the page.
+function rehypeScrollTables() {
+  const visit = (node: any) => {
+    node.children?.forEach((child: any, i: number) => {
+      if (child.type === "element" && child.tagName === "table") {
+        node.children[i] = {
+          type: "element",
+          tagName: "div",
+          properties: { className: ["table-scroll"] },
+          children: [child],
+        };
+      } else {
+        visit(child);
+      }
+    });
+  };
+  return (tree: any) => visit(tree);
+}
+
 function nodeText(node: any): string {
   if (node.type === "text") return node.value;
   return (node.children ?? []).map(nodeText).join("");
@@ -98,6 +117,7 @@ export async function markdownToHTMLWithToc(markdown: string) {
     .use(remarkMermaid)
     .use(remarkRehype)
     .use(rehypeExternalLinks)
+    .use(rehypeScrollTables)
     .use(rehypeSlug)
     .use(rehypeCollectToc(toc))
     .use(rehypeAutolinkHeadings, {

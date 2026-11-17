@@ -94,10 +94,9 @@ flowchart LR
     GH["GitHub: pull request opened"] -- "webhook, signed" --> API["FastAPI: verify signature, reply fast"]
     API --> Q[("Job queue")]
     Q --> W["Worker: agent loop"]
-    W -- "fetch diff and files" --> GHA["GitHub API"]
+    W -- "read diff and files,<br/>post inline comments" --> GHA["GitHub API"]
     W -- "grep, run tests" --> SB["Sandbox with the repo checked out"]
     W -- "review prompt" --> LLM["LLM"]
-    W -- "inline comments on diff lines" --> GHA
 ```
 
 1. GitHub sends a **webhook** (an HTTP POST) when a pull request is opened or updated.

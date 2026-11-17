@@ -172,12 +172,12 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
 }
 .prose figure.mermaid-diagram[data-rendered] pre.mermaid { display: none; }
 .prose figure.mermaid-diagram .mermaid-svg { @apply flex justify-center; }
-.prose figure.mermaid-diagram .mermaid-svg.measuring {
-  position: absolute;
-  left: -100000px;
-  visibility: hidden;
+/* Too wide to fit at a readable size: scroll sideways inside the figure. */
+.prose figure.mermaid-diagram .mermaid-svg.scrolls {
+  @apply block overflow-x-auto pb-2;
+  -webkit-overflow-scrolling: touch;
 }
-.prose figure.mermaid-diagram.expandable { cursor: zoom-in; }
+.prose figure.mermaid-diagram.expandable svg { cursor: zoom-in; }
 .prose figure.mermaid-diagram .mermaid-expand {
   @apply absolute -top-3 right-0 rounded-md border bg-background px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground;
 }
@@ -232,3 +232,10 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
 @media (hover: none) {
   .prose .code-copy { opacity: 1; }
 }
+
+/* Wide tables scroll inside the column (data/blog.ts rehypeScrollTables). */
+.prose .table-scroll { @apply overflow-x-auto; }
+.prose .table-scroll > table { @apply my-0; }
+.prose .table-scroll { @apply my-6; }
+/* Long inline code (identifiers, calls) may break instead of widening the page. */
+.prose :not(pre) > code { overflow-wrap: anywhere; }

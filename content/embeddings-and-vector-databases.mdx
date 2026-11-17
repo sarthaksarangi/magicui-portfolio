@@ -99,20 +99,14 @@ HNSW builds a graph in layers. Every vector is a node. The bottom layer holds al
 
 ```mermaid
 flowchart TD
-    Q["Query vector"] --> E
-    subgraph L2["Layer 2: very few nodes, long jumps"]
-        E["Entry point"] --> A2["Node A"]
-    end
-    subgraph L1["Layer 1: more nodes, medium jumps"]
-        A1["Node A"] --> B1["Node B"]
-        B1 --> C1["Node C"]
-    end
-    subgraph L0["Layer 0: every vector, short hops"]
-        C0["Node C"] --> D0["Node D"]
-        D0 --> F0["Nearest neighbours"]
-    end
-    A2 -->|"drop down"| A1
-    C1 -->|"drop down"| C0
+    Q["Query vector"] --> E["<b>Layer 2</b> · very few nodes<br/>Entry point"]
+    E -- "long jump" --> A2["<b>Layer 2</b><br/>Node A"]
+    A2 -- "drop down" --> A1["<b>Layer 1</b> · more nodes<br/>Node A"]
+    A1 -- "medium jump" --> B1["<b>Layer 1</b><br/>Node B"]
+    B1 --> C1["<b>Layer 1</b><br/>Node C"]
+    C1 -- "drop down" --> C0["<b>Layer 0</b> · every vector<br/>Node C"]
+    C0 -- "short hop" --> D0["<b>Layer 0</b><br/>Node D"]
+    D0 --> F0["Nearest neighbours"]
 ```
 
 The three knobs (names as used in pgvector):

@@ -5,29 +5,87 @@ import { useEffect } from "react";
 
 // Renders every <figure class="mermaid-diagram"> on the page to SVG.
 //
-// - Mermaid is loaded only on pages that have diagrams.
+// - Mermaid is loaded only when a diagram comes near the viewport, and each
+//   diagram is rendered lazily as it approaches (IntersectionObserver).
+// - Rendered SVGs are cached per theme + source, so toggling the theme back
+//   and forth, or revisiting a post, does not re-run Mermaid.
 // - Diagrams re-render when the light/dark theme changes.
-// - Each diagram is scaled to fit the text column. A wide left-to-right
-//   flowchart is also tried top-to-bottom, and the more readable one is kept.
-// - If fitting would shrink the text below MIN_SCALE, an "Expand" button
-//   (and clicking the diagram) opens it at full size in an overlay.
+// - Each diagram is scaled down to fit the text column if that keeps it at
+//   FIT_FLOOR or larger. A wider diagram is shown at SCROLL_SCALE instead,
+//   scrolls sideways inside its own box, and gets an "Expand" button
+//   (full-size overlay), so labels stay readable.
+// - A wide left-to-right flowchart is also tried top-to-bottom, and the
+//   narrower one is kept.
 // - Without JavaScript the diagram source stays visible as a fallback.
 
-const MIN_SCALE = 0.65;
+const FIT_FLOOR = 0.6;
+const SCROLL_SCALE = 0.7;
+const LR = /^(\s*(?:flowchart|graph|direction)\s+)LR\b/gm;
+
+type Rendered = { svg: string; width: number };
 
 let renderCount = 0;
+const cache = new Map<string, Promise<Rendered>>();
+let mermaidPromise: Promise<typeof import("mermaid").default> | null = null;
+let initializedTheme: string | null = null;
 
-async function renderAndMeasure(
-  mermaid: typeof import("mermaid").default,
-  host: HTMLElement,
-  source: string,
-) {
-  const { svg } = await mermaid.render(`mermaid-${++renderCount}`, source);
-  host.innerHTML = svg;
-  const el = host.querySelector("svg") as SVGSVGElement;
-  el.style.maxWidth = "none";
-  const width = el.getBoundingClientRect().width || 1;
-  return { svg, width };
+function loadMermaid() {
+  mermaidPromise ??= import("mermaid").then((m) => m.default);
+  return mermaidPromise;
+}
+
+function naturalWidth(svg: string) {
+  const viewBox = svg.match(/viewBox="([^"]+)"/)?.[1].split(/[\s,]+/);
+  return Number(viewBox?.[2]) || 1;
+}
+
+// Mermaid keeps global config, so renders must not interleave themes.
+// All renders go through one chain.
+let queue: Promise<unknown> = Promise.resolve();
+
+function render(theme: string, source: string): Promise<Rendered> {
+  const key = `${theme}\n${source}`;
+  let hit = cache.get(key);
+  if (!hit) {
+    hit = new Promise<Rendered>((resolve, reject) => {
+      queue = queue.then(async () => {
+        try {
+          const mermaid = await loadMermaid();
+          if (initializedTheme !== theme) {
+            const config = { useMaxWidth: false };
+            mermaid.initialize({
+              startOnLoad: false,
+              securityLevel: "strict",
+              theme: theme === "dark" ? "dark" : "neutral",
+              fontFamily: "ui-sans-serif, system-ui, sans-serif",
+              flowchart: config,
+              state: config,
+              class: config,
+              er: config,
+              sequence: {
+                ...config,
+                wrap: true,
+                width: 130,
+                actorMargin: 40,
+                mirrorActors: false,
+              },
+            });
+            initializedTheme = theme;
+          }
+          const { svg } = await mermaid.render(
+            `mermaid-${++renderCount}`,
+            source,
+          );
+          resolve({ svg, width: naturalWidth(svg) });
+        } catch (error) {
+          cache.delete(key);
+          reject(error);
+        }
+      });
+    });
+    cache.set(key, hit);
+  }
+  return hit;
 }
 
 function openOverlay(svg: string) {
@@ -54,93 +112,120 @@ function openOverlay(svg: string) {
   (overlay.querySelector("button") as HTMLButtonElement).focus();
 }
 
+async function drawFigure(
+  figure: HTMLElement,
+  theme: string,
+  isCancelled: () => boolean,
+) {
+  const source =
+    figure.dataset.source ??
+    figure.querySelector("pre.mermaid")?.textContent ??
+    "";
+  figure.dataset.source = source;
+
+  let output = figure.querySelector<HTMLElement>(".mermaid-svg");
+  if (!output) {
+    output = document.createElement("div");
+    output.className = "mermaid-svg";
+    figure.appendChild(output);
+  }
+
+  try {
+    const column = figure.clientWidth || 600;
+    let best = await render(theme, source);
+    LR.lastIndex = 0;
+    if (column / best.width < 1 && LR.test(source)) {
+      const tb = await render(theme, source.replace(LR, "$1TB"));
+      if (tb.width < best.width) best = tb;
+    }
+    if (isCancelled()) return;
+
+    const fit = column / best.width;
+    const scrolls = fit < FIT_FLOOR;
+    const scale = scrolls ? SCROLL_SCALE : Math.min(1, fit);
+    output.innerHTML = best.svg;
+    const svg = output.querySelector("svg") as SVGSVGElement;
+    svg.removeAttribute("height");
+    svg.style.maxWidth = "none";
+    svg.style.width = `${best.width * scale}px`;
+    svg.style.height = "auto";
+    output.classList.toggle("scrolls", scrolls);
+    figure.dataset.rendered = theme;
+    delete figure.dataset.failed;
+
+    figure.querySelector(".mermaid-expand")?.remove();
+    figure.classList.remove("expandable");
+    figure.onclick = null;
+    if (scrolls) {
+      figure.classList.add("expandable");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "mermaid-expand";
+      button.textContent = "Expand ⤢";
+      button.setAttribute("aria-label", "Open diagram at full size");
+      button.onclick = (e) => {
+        e.stopPropagation();
+        openOverlay(best.svg);
+      };
+      figure.appendChild(button);
+      // Clicking the diagram also expands it, unless the reader is
+      // scrolling it sideways.
+      svg.addEventListener("click", () => openOverlay(best.svg));
+    }
+  } catch (error) {
+    figure.dataset.failed = "true";
+    console.error("Mermaid diagram failed to render", error);
+  }
+}
+
 export function MermaidDiagrams() {
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
+    // next-themes resolves the theme after mount; wait for it so each
+    // diagram is rendered once, in the right theme.
+    if (!resolvedTheme) return;
+    const theme = resolvedTheme;
     const figures = Array.from(
       document.querySelectorAll<HTMLElement>("figure.mermaid-diagram"),
     );
     if (figures.length === 0) return;
     let cancelled = false;
+    const isCancelled = () => cancelled;
 
-    (async () => {
-      const mermaid = (await import("mermaid")).default;
-      const config = { useMaxWidth: false };
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: "strict",
-        theme: resolvedTheme === "dark" ? "dark" : "neutral",
-        fontFamily: "ui-sans-serif, system-ui, sans-serif",
-        flowchart: config,
-        sequence: config,
-        state: config,
-        class: config,
-        er: config,
-      });
-
-      for (const figure of figures) {
-        if (cancelled) return;
-        const source =
-          figure.dataset.source ??
-          figure.querySelector("pre.mermaid")?.textContent ??
-          "";
-        figure.dataset.source = source;
-
-        let output = figure.querySelector<HTMLElement>(".mermaid-svg");
-        if (!output) {
-          output = document.createElement("div");
-          output.className = "mermaid-svg";
-          figure.appendChild(output);
-        }
-
-        try {
-          // Measure off-layout so the column width is not affected.
-          output.classList.add("measuring");
-          const column = figure.clientWidth || 600;
-          let best = await renderAndMeasure(mermaid, output, source);
-
-          const leftToRight = /^\s*(flowchart|graph)\s+LR\b/;
-          if (column / best.width < MIN_SCALE && leftToRight.test(source)) {
-            const tb = await renderAndMeasure(
-              mermaid,
-              output,
-              source.replace(leftToRight, "$1 TB"),
-            );
-            if (tb.width < best.width) best = tb;
-          }
-          if (cancelled) return;
-
-          output.innerHTML = best.svg;
-          output.classList.remove("measuring");
-          const svg = output.querySelector("svg") as SVGSVGElement;
-          svg.style.maxWidth = "100%";
-          svg.style.height = "auto";
-          figure.dataset.rendered = "true";
-
-          figure.querySelector(".mermaid-expand")?.remove();
-          figure.classList.remove("expandable");
-          figure.onclick = null;
-          if (column / best.width < MIN_SCALE) {
-            figure.classList.add("expandable");
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "mermaid-expand";
-            button.textContent = "Expand ⤢";
-            button.setAttribute("aria-label", "Open diagram at full size");
-            figure.appendChild(button);
-            figure.onclick = () => openOverlay(best.svg);
-          }
-        } catch (error) {
-          output.classList.remove("measuring");
-          figure.dataset.failed = "true";
-          console.error("Mermaid diagram failed to render", error);
-        }
+    // Already-drawn diagrams switch theme right away; the rest wait
+    // until they come near the viewport.
+    const pending: HTMLElement[] = [];
+    for (const figure of figures) {
+      if (figure.dataset.rendered && figure.dataset.rendered !== theme) {
+        drawFigure(figure, theme, isCancelled);
+      } else if (!figure.dataset.rendered) {
+        pending.push(figure);
       }
-    })();
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      pending.forEach((f) => drawFigure(f, theme, isCancelled));
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          drawFigure(entry.target as HTMLElement, theme, isCancelled);
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    pending.forEach((f) => observer.observe(f));
 
     return () => {
       cancelled = true;
+      observer.disconnect();
     };
   }, [resolvedTheme]);
 

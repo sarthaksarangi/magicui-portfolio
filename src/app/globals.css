@@ -210,3 +210,25 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
     padding: 0 !important;
   }
 }
+
+/* Heading anchors (rehype-autolink-headings) and TOC targets. */
+.prose :is(h2, h3)[id] { scroll-margin-top: 1.5rem; }
+.prose .heading-anchor {
+  @apply ml-2 font-normal text-muted-foreground no-underline opacity-0 transition-opacity;
+}
+.prose :is(h2, h3):hover .heading-anchor,
+.prose .heading-anchor:focus { opacity: 1; }
+@media (hover: none) {
+  .prose .heading-anchor { opacity: 0.4; }
+}
+.toc[open] summary { @apply text-foreground; }
+
+/* Copy button on code blocks (components/code-copy-buttons.tsx). */
+.prose .code-copy-host { @apply relative; }
+.prose .code-copy {
+  @apply absolute right-2 top-2 rounded-md border bg-background px-2 py-0.5 text-xs text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus:opacity-100;
+}
+.prose .code-copy-host:hover .code-copy { opacity: 1; }
+@media (hover: none) {
+  .prose .code-copy { opacity: 1; }
+}

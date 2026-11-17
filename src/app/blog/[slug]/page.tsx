@@ -1,9 +1,12 @@
+import { CodeCopyButtons } from "@/components/code-copy-buttons";
 import { MermaidDiagrams } from "@/components/mermaid-diagrams";
 import { Prereqs, SeriesHeader, SeriesPager } from "@/components/series-nav";
+import { TableOfContents } from "@/components/table-of-contents";
 import { getPost, getPostsMeta, getSeriesPosts } from "@/data/blog";
 import { DATA } from "@/data/resume";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -104,6 +107,12 @@ export default async function Blog({
           }),
         }}
       />
+      <Link
+        href="/blog"
+        className="mb-6 inline-block text-sm text-muted-foreground hover:text-foreground"
+      >
+        ← Back to blog
+      </Link>
       {series && parts.length > 0 ? (
         <SeriesHeader post={meta} parts={parts} />
       ) : null}
@@ -124,11 +133,13 @@ export default async function Blog({
         </p>
       </div>
       <Prereqs slugs={post.metadata.prereqs} all={parts} />
+      <TableOfContents items={post.toc} />
       <article
         className="prose dark:prose-invert"
         dangerouslySetInnerHTML={{ __html: post.source }}
       ></article>
       <MermaidDiagrams />
+      <CodeCopyButtons />
       {series && parts.length > 0 ? (
         <SeriesPager post={meta} parts={parts} />
       ) : null}

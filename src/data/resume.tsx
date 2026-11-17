@@ -14,6 +14,7 @@ export const DATA = {
     "I build Generative AI products end to end: the RAG pipeline or agent in Python, the API behind it, and the interface people actually use.",
     "**What I build.** RAG systems that answer from your own documents with citations, LLM agents and automated workflows, and full-stack apps in Next.js and TypeScript. Recent work includes [DocSage](https://github.com/sarthaksarangi/docsage), a RAG assistant for technical PDFs built on LangChain and pgvector, and [TickrFlow](https://tickrflow.sarthaksarangi.com/), which runs a scheduled LLM pipeline to email personalized market summaries.",
     "**Production experience.** I'm a Software Engineer at [Exotel](https://exotel.com), where I've built LLM-powered automation with FastAPI and Pydantic, including a platform that turns report customization requests into explained, ready-to-apply changes. Before that I was at [Ericsson](https://www.ericsson.com), where I built Java Spring Boot services that synced 10,000+ enterprise product updates a day, automated 30+ hours of manual work a week, and cut bulk upload times from 45s to 15s.",
+    "**Writing.** [AI Engineering, Explained](/blog/ai-engineering-explained) is a 23-part series on building with LLMs, from how models work and prompting to RAG, agents, MCP, evals and running AI apps in production.",
     "**Get in touch.** If you're building with LLMs, whether a RAG system, an agent, or an AI feature, I'd like to hear about it. [Email me](mailto:sarthaksarangi.dev@gmail.com).",
   ].join("\n\n"),
 

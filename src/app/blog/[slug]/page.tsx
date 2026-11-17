@@ -1,6 +1,11 @@
 import { CodeCopyButtons } from "@/components/code-copy-buttons";
 import { MermaidDiagrams } from "@/components/mermaid-diagrams";
-import { Prereqs, SeriesHeader, SeriesPager } from "@/components/series-nav";
+import {
+  Prereqs,
+  SeriesHeader,
+  SeriesPager,
+  SeriesProgress,
+} from "@/components/series-nav";
 import { TableOfContents } from "@/components/table-of-contents";
 import { TopicChips } from "@/components/topic-links";
 import { getPost, getPostsMeta, getSeriesPosts } from "@/data/blog";
@@ -113,13 +118,16 @@ export default async function Blog({
         ← Back to blog
       </Link>
       {series && parts.length > 0 ? (
-        <SeriesHeader post={meta} parts={parts} />
+        <>
+          <SeriesHeader post={meta} parts={parts} />
+          <SeriesProgress post={meta} parts={parts} />
+        </>
       ) : null}
       <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
         {post.metadata.title}
       </h1>
       <div
-        className={`flex justify-between items-center mt-2 text-sm max-w-[650px] ${post.metadata.prereqs?.length ? "mb-3" : "mb-8"}`}
+        className={`flex flex-wrap justify-between items-center gap-x-4 gap-y-1 mt-2 text-sm max-w-[650px] ${post.metadata.prereqs?.length ? "mb-3" : "mb-8"}`}
       >
         <Suspense fallback={<p className="h-5" />}>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">

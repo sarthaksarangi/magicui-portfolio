@@ -239,3 +239,22 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
 .prose .table-scroll { @apply my-6; }
 /* Long inline code (identifiers, calls) may break instead of widening the page. */
 .prose :not(pre) > code { overflow-wrap: anywhere; }
+
+/* Glossary links (lib/glossary.ts): quieter than normal links. */
+.prose a.glossary-term {
+  @apply font-normal no-underline;
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: hsl(var(--muted-foreground));
+}
+.prose a.glossary-term:hover { text-decoration-color: currentColor; }
+/* Glossary entry targeted from a post. */
+.prose li[id^="term-"] { scroll-margin-top: 1.5rem; }
+.prose li[id^="term-"]:target {
+  @apply rounded-sm;
+  background: hsl(var(--muted));
+  box-shadow: 0 0 0 6px hsl(var(--muted));
+}

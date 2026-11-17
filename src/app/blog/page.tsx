@@ -1,5 +1,6 @@
 import BlurFade from "@/components/magicui/blur-fade";
-import { getPostsMeta, type PostMeta } from "@/data/blog";
+import { TopicList } from "@/components/topic-links";
+import { getPostsMeta, getTopics, type PostMeta } from "@/data/blog";
 import Link from "next/link";
 
 export const metadata = {
@@ -32,6 +33,14 @@ export default async function BlogPage() {
     <section>
       <BlurFade delay={BLUR_FADE_DELAY}>
         <h1 className="font-medium text-2xl mb-8 tracking-tighter">Blog</h1>
+      </BlurFade>
+      <BlurFade delay={BLUR_FADE_DELAY * 1.5}>
+        <div className="mb-8">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Browse by topic
+          </p>
+          <TopicList topics={getTopics()} />
+        </div>
       </BlurFade>
 
       {Array.from(series.entries()).map(([name, parts]) => {

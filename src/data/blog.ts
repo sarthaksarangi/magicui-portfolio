@@ -9,6 +9,7 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
+import { rehypeGlossaryAnchors, rehypeGlossaryLinks } from "@/lib/glossary";
 import { remarkCallouts, remarkMermaid } from "@/lib/remark-blog";
 
 export type Metadata = {
@@ -108,7 +109,7 @@ export async function markdownToHTML(markdown: string) {
   return html;
 }
 
-export async function markdownToHTMLWithToc(markdown: string) {
+export async function markdownToHTMLWithToc(markdown: string, slug = "") {
   const toc: TocItem[] = [];
   const p = await unified()
     .use(remarkParse)
@@ -118,6 +119,8 @@ export async function markdownToHTMLWithToc(markdown: string) {
     .use(remarkRehype)
     .use(rehypeExternalLinks)
     .use(rehypeScrollTables)
+    .use(rehypeGlossaryLinks(slug))
+    .use(rehypeGlossaryAnchors(slug))
     .use(rehypeSlug)
     .use(rehypeCollectToc(toc))
     .use(rehypeAutolinkHeadings, {
@@ -143,7 +146,7 @@ export async function getPost(slug: string) {
   const filePath = path.join("content", `${slug}.mdx`);
   let source = fs.readFileSync(filePath, "utf-8");
   const { content: rawContent, data } = matter(source);
-  const { html: content, toc } = await markdownToHTMLWithToc(rawContent);
+  const { html: content, toc } = await markdownToHTMLWithToc(rawContent, slug);
   return {
     source: content,
     toc,
@@ -194,6 +197,84 @@ export function getPostsMeta(): PostMeta[] {
       readingMinutes: readingMinutes(content),
     };
   });
+}
+
+// Topic pages (/blog/tag/<slug>). Post frontmatter `tags` use these slugs.
+export const TOPICS: Record<string, { label: string; description: string }> = {
+  rag: {
+    label: "RAG",
+    description:
+      "Retrieval-augmented generation: embeddings, vector search, chunking, reranking and grounded answers.",
+  },
+  agents: {
+    label: "Agents",
+    description:
+      "LLMs that act in a loop: tools, memory, LangGraph, MCP, multi-agent systems and human approval.",
+  },
+  "tool-calling": {
+    label: "Tool calling",
+    description:
+      "Letting the model call your code: schemas, structured outputs, MCP and agent tools.",
+  },
+  prompting: {
+    label: "Prompting and context",
+    description:
+      "Writing prompts, structuring outputs and deciding what goes into the context window.",
+  },
+  evals: {
+    label: "Evals and observability",
+    description:
+      "Measuring LLM apps: eval sets, LLM judges, retrieval metrics, tracing and error analysis.",
+  },
+  security: {
+    label: "Security",
+    description:
+      "Prompt injection, guardrails, sandboxes, permissions and least privilege.",
+  },
+  production: {
+    label: "Production",
+    description:
+      "Running AI apps for real users: backends, deployment, reliability, monitoring and system design.",
+  },
+  "cost-and-latency": {
+    label: "Cost and latency",
+    description:
+      "Making LLM apps fast and affordable: model choice, caching, streaming and retries.",
+  },
+  models: {
+    label: "Models",
+    description:
+      "How LLMs and embedding models work, how to choose one, and when to fine-tune.",
+  },
+  interview: {
+    label: "Interview prep",
+    description:
+      "Question banks, a glossary and system-design practice for AI engineering interviews.",
+  },
+};
+
+export function topicLabel(slug: string) {
+  return TOPICS[slug]?.label ?? slug;
+}
+
+export function getTopics() {
+  const posts = getPostsMeta();
+  return Object.keys(TOPICS)
+    .map((slug) => ({
+      slug,
+      ...TOPICS[slug],
+      count: posts.filter((p) => p.metadata.tags?.includes(slug)).length,
+    }))
+    .filter((t) => t.count > 0);
+}
+
+export function getPostsByTopic(slug: string): PostMeta[] {
+  return getPostsMeta()
+    .filter((p) => p.metadata.tags?.includes(slug))
+    .sort(
+      (a, b) =>
+        (a.metadata.seriesOrder ?? 999) - (b.metadata.seriesOrder ?? 999),
+    );
 }
 
 export function getSeriesPosts(series: string): PostMeta[] {

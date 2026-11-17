@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 import { DATA } from "@/data/resume";
-import { getPostsMeta } from "@/data/blog";
+import { getPostsMeta, getTopics } from "@/data/blog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogPosts = getPostsMeta();
@@ -32,5 +32,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     ...blogRoutes,
+    ...getTopics().map((t) => ({
+      url: `${DATA.url}/blog/tag/${t.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
   ];
 }

@@ -2,6 +2,7 @@ import { CodeCopyButtons } from "@/components/code-copy-buttons";
 import { MermaidDiagrams } from "@/components/mermaid-diagrams";
 import { Prereqs, SeriesHeader, SeriesPager } from "@/components/series-nav";
 import { TableOfContents } from "@/components/table-of-contents";
+import { TopicChips } from "@/components/topic-links";
 import { getPost, getPostsMeta, getSeriesPosts } from "@/data/blog";
 import { DATA } from "@/data/resume";
 import { formatDate } from "@/lib/utils";
@@ -140,6 +141,7 @@ export default async function Blog({
       ></article>
       <MermaidDiagrams />
       <CodeCopyButtons />
+      <TopicChips tags={post.metadata.tags} className="mt-10 max-w-[650px]" />
       {series && parts.length > 0 ? (
         <SeriesPager post={meta} parts={parts} />
       ) : null}

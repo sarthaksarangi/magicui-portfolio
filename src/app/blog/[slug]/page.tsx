@@ -1,4 +1,6 @@
-import { getBlogPosts, getPost } from "@/data/blog";
+import { MermaidDiagrams } from "@/components/mermaid-diagrams";
+import { Prereqs, SeriesHeader, SeriesPager } from "@/components/series-nav";
+import { getPost, getPostsMeta, getSeriesPosts } from "@/data/blog";
 import { DATA } from "@/data/resume";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -6,8 +8,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 export async function generateStaticParams() {
-  const posts = await getBlogPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  return getPostsMeta().map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
@@ -23,6 +24,7 @@ export async function generateMetadata({
   let {
     title,
     publishedAt: publishedTime,
+    tags,
     summary: description,
     image,
   } = post.metadata;
@@ -36,6 +38,7 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime,
+      ...(tags ? { tags } : {}),
       url: `${DATA.url}/blog/${post.slug}`,
       images: [
         {
@@ -66,6 +69,14 @@ export default async function Blog({
     notFound();
   }
 
+  const { series } = post.metadata;
+  const parts = series ? getSeriesPosts(series) : [];
+  const meta = {
+    slug: post.slug,
+    metadata: post.metadata,
+    readingMinutes: post.readingMinutes,
+  };
+
   return (
     <section id="blog">
       <script
@@ -83,6 +94,9 @@ export default async function Blog({
               ? `${DATA.url}${post.metadata.image}`
               : `${DATA.url}/opengraph-image`,
             url: `${DATA.url}/blog/${post.slug}`,
+            ...(post.metadata.tags
+              ? { keywords: post.metadata.tags.join(", ") }
+              : {}),
             author: {
               "@type": "Person",
               name: DATA.name,
@@ -90,20 +104,34 @@ export default async function Blog({
           }),
         }}
       />
+      {series && parts.length > 0 ? (
+        <SeriesHeader post={meta} parts={parts} />
+      ) : null}
       <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
         {post.metadata.title}
       </h1>
-      <div className="flex justify-between items-center mt-2 mb-8 text-sm max-w-[650px]">
+      <div
+        className={`flex justify-between items-center mt-2 text-sm max-w-[650px] ${post.metadata.prereqs?.length ? "mb-3" : "mb-8"}`}
+      >
         <Suspense fallback={<p className="h-5" />}>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
             {formatDate(post.metadata.publishedAt)}
           </p>
         </Suspense>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          {post.metadata.level ? `${post.metadata.level} · ` : ""}
+          {post.readingMinutes} min read
+        </p>
       </div>
+      <Prereqs slugs={post.metadata.prereqs} all={parts} />
       <article
         className="prose dark:prose-invert"
         dangerouslySetInnerHTML={{ __html: post.source }}
       ></article>
+      <MermaidDiagrams />
+      {series && parts.length > 0 ? (
+        <SeriesPager post={meta} parts={parts} />
+      ) : null}
     </section>
   );
 }

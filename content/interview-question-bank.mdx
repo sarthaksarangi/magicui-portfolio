@@ -1,0 +1,441 @@
+---
+title: AI Engineering Interview Question Bank
+publishedAt: '2026-11-17'
+summary: 'About 100 questions that AI-engineer interviews actually ask, with short answers in plain words, grouped by topic and tagged (basic), (mid) or (senior). Use it for self-testing: cover the answer, say yours out loud, then compare.'
+series: AI Engineering, Explained
+seriesOrder: 22
+section: Interview prep
+level: Beginner
+tags:
+- ai-engineering
+- interview
+prereqs:
+- ai-engineering-explained
+---
+
+> [!summary] About 100 questions that AI-engineer interviews actually ask, with short answers in plain words, grouped by topic and tagged (basic), (mid) or (senior). Use it for self-testing: cover the answer, say yours out loud, then compare.
+
+## How to use this post
+
+- (basic) means you must know it for any AI role. (mid) is expected of someone who has shipped an LLM feature. (senior) tests trade-offs and production judgement.
+- Do not memorise the wording. Learn the idea, then answer in your own words with an example from your projects.
+
+## 1. LLM fundamentals
+
+Full post: [How LLMs Work](/blog/how-llms-work)
+
+**Q: What does an LLM actually do? (basic)**
+It predicts the next token given all the tokens so far, then repeats. Everything else (chat, code, reasoning) comes out of doing that one step again and again.
+
+**Q: What is a token? (basic)**
+A token is a piece of text, often a word or part of a word, that the model reads and writes. Limits and prices are counted in tokens, not characters.
+
+**Q: What is the context window? (basic)**
+It is the largest number of tokens the model can take in one request, input and output together. The model has no memory outside it; anything not in the window does not exist for the model.
+
+**Q: What do temperature and top-p do? (basic)**
+Both control how random the choice of the next token is. Low temperature makes the model pick the most likely tokens, so output is more repeatable; top-p limits the choice to the smallest set of tokens whose probabilities add up to p.
+
+**Q: Why do LLMs hallucinate? (mid)**
+The model is trained to produce likely text, not true text, and it has no built-in way to check facts. When it lacks the knowledge it still produces something fluent. Grounding the answer in retrieved sources and allowing "I don't know" reduces this.
+
+**Q: What is attention, in one or two sentences? (mid)**
+Attention lets each token look at the other tokens and decide which ones matter for its meaning. That is how "it" in a sentence gets linked to the right noun.
+
+**Q: Why is temperature 0 still not fully deterministic? (senior)**
+Small floating-point differences across hardware and batching on the provider's side can change which token wins a near tie. Treat temperature 0 as "mostly repeatable", and design tests and evals to tolerate small variation.
+
+## 2. APIs and prompting
+
+Full notes: [LLM APIs and Model Selection](/blog/llm-apis-and-model-selection), [Prompt Engineering](/blog/prompt-engineering)
+
+**Q: What are the message roles in a chat API? (basic)**
+System sets the rules and persona, user carries the person's input, assistant holds the model's earlier replies, and tool holds results of tool calls. The API is stateless, so you send the whole history each time.
+
+**Q: Zero-shot versus few-shot prompting? (basic)**
+Zero-shot gives only instructions. Few-shot adds a handful of example inputs and outputs, which is often the quickest way to fix format and tone.
+
+**Q: How do you choose a model for a task? (mid)**
+Start from the needs: quality, latency, cost, context size, privacy. Try a small model first on your own eval set, and move up only if it fails.
+
+**Q: What makes a good system prompt? (mid)**
+A clear role, the task, the rules, the output format and what to do when unsure, with the reason behind important rules. Keep it structured, put fixed content first so it can be cached, and version it like code.
+
+**Q: What is chain-of-thought and is it still needed? (mid)**
+It means asking the model to reason step by step before answering, which helps on multi-step problems. Reasoning models do this internally, so there you state the goal clearly instead of forcing steps.
+
+**Q: How do you manage prompts across a team? (senior)**
+Keep prompts in version control or a prompt registry, tie each version to eval results, and never change a production prompt without running the eval suite. Log the prompt version in every trace so you can link a regression to a change.
+
+## 3. Structured output and tool calling
+
+Full post: [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling)
+
+**Q: What is structured output? (basic)**
+It is making the model return data in a fixed shape, usually JSON that matches a schema, so code can use it. You then validate it, typically with Pydantic.
+
+**Q: JSON mode versus structured outputs with a schema? (mid)**
+JSON mode only promises valid JSON. Schema-based structured output makes the provider constrain generation to your JSON Schema, so keys and types are right. Neither guarantees that the values are true or sensible, so you still validate.
+
+**Q: How does tool calling work? (basic)**
+You send the model a list of tools with names, descriptions and argument schemas. The model replies with a tool name and arguments; your code runs the tool and sends the result back; the model then continues. The model never runs anything itself.
+
+**Q: The model returned output that fails validation. What do you do? (mid)**
+Send the validation error back and ask it to fix the output, with a cap of one or two retries. If it still fails, fall back to a default or a clear error.
+
+**Q: What makes a good tool definition? (mid)**
+A clear name, a description that says when to use it and when not to, few and well-typed arguments, and error messages that tell the model how to recover. Most "the model picked the wrong tool" bugs are description bugs.
+
+**Q: How do you handle parallel tool calls and side effects? (senior)**
+Read-only calls can run in parallel with `asyncio.gather`, and each result is returned with its matching tool call id. Tools that change things should run one at a time, be idempotent and, if risky, wait for approval.
+
+## 4. Embeddings and vector databases
+
+Full post: [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases)
+
+**Q: What is an embedding? (basic)**
+A list of numbers that stands for the meaning of a piece of text. Texts with similar meaning get vectors that are close together, which is what makes semantic search possible.
+
+**Q: What is cosine similarity? (basic)**
+It measures the angle between two vectors: 1 means same direction, 0 means unrelated. If vectors are normalised to length 1, cosine similarity equals the dot product.
+
+**Q: Why use approximate nearest neighbour search? (mid)**
+Comparing the query with every vector is exact but too slow for millions of vectors. ANN indexes such as HNSW check only a small part of the data and give almost the same results much faster, trading a little recall for speed.
+
+**Q: How does HNSW work at a high level? (mid)**
+It builds a layered graph in which each vector links to its near neighbours. Search starts in a sparse top layer, hops towards the query, and drops down to denser layers.
+
+**Q: pgvector or a dedicated vector database? (mid)**
+pgvector keeps vectors next to your relational data, with SQL filters, transactions and one system to run. A dedicated database earns its place at very large scale or when you need special features. Start with Postgres if you already use it.
+
+**Q: You changed the embedding model. What must you do? (senior)**
+Re-embed every document, because vectors from different models are not comparable. Build the new index beside the old one, run retrieval evals on both, then switch over.
+
+## 5. RAG
+
+Full post: [RAG Fundamentals](/blog/rag-fundamentals)
+
+**Q: What is RAG and why use it? (basic)**
+Retrieval-augmented generation finds relevant text first and puts it in the prompt so the model answers from it. It gives the model private and fresh knowledge, allows citations and reduces hallucination, without any training.
+
+**Q: Walk me through a RAG pipeline. (basic)**
+Offline: load documents, split into chunks, embed, store. Online: embed the question, retrieve the top chunks, build a prompt with them, generate the answer with citations.
+
+**Q: How do you choose chunk size and overlap? (mid)**
+Small chunks are precise but lose context; large chunks keep context but dilute the match. Start with a few hundred tokens and a small overlap, split on natural boundaries such as headings, and then tune using retrieval metrics on your golden set.
+
+**Q: RAG versus fine-tuning versus a long context window? (mid)**
+RAG adds knowledge that changes and needs citing. Fine-tuning changes behaviour, style or format. A long context works for a small, fixed set of documents but costs more per call and is slower.
+
+**Q: The answer is wrong. How do you debug? (mid)**
+Look at the retrieved chunks first. If the right chunk is missing, fix retrieval (chunking, hybrid search, query rewriting). If it is present and the answer is still wrong, fix generation (prompt, model, too much noise in context).
+
+**Q: How do you make the system say "I don't know"? (mid)**
+Tell the model to answer only from the context and to say so when the context is not enough. Add a code check too: if retrieval scores are below a threshold, skip generation and return a "not found" reply.
+
+## 6. Advanced RAG
+
+Full post: [Advanced RAG](/blog/advanced-rag)
+
+**Q: What is hybrid search? (mid)**
+Running keyword search (BM25) and vector search together and merging the results. Keywords catch exact names and codes; vectors catch meaning. Together they miss less.
+
+**Q: What is Reciprocal Rank Fusion? (mid)**
+A way to merge ranked lists using only positions. Each document scores the sum of 1 / (k + rank) over the lists, with k often 60. It needs no score normalisation, which is why it is the common default.
+
+**Q: Bi-encoder versus cross-encoder? (mid)**
+A bi-encoder embeds the query and document separately, so documents can be indexed ahead of time; it is fast but less exact. A cross-encoder reads the query and document together and scores the pair; it is more accurate but slow, so it is used to rerank a short list.
+
+**Q: What is HyDE? (mid)**
+The model first writes a made-up answer to the question, and you embed that instead of the question. A hypothetical answer often looks more like the real documents than a short question does. It adds an LLM call and can mislead on topics the model knows poorly.
+
+**Q: What query transformations do you know? (mid)**
+Rewriting a chat follow-up into a standalone question, expanding into several phrasings (multi-query), breaking a complex question into sub-questions, and HyDE. Each adds latency, so add them only when evals show a gain.
+
+**Q: What is agentic RAG and when is it worth it? (senior)**
+The model decides whether to retrieve, judges the results, and may rewrite the query and try again. It helps on multi-step or vague questions. It costs more calls and time, so keep plain RAG for simple lookups and cap the loop.
+
+## 7. Agents
+
+Full post: [Agent Fundamentals](/blog/agent-fundamentals)
+
+**Q: What is an agent? (basic)**
+An LLM that runs in a loop, choosing tools and using their results, until it decides the task is done. The model controls the flow, not your code.
+
+**Q: Workflow versus agent? (basic)**
+In a workflow your code fixes the steps and the LLM fills in each one. In an agent the model picks the next step. Workflows are cheaper and more predictable; use an agent only when the steps cannot be known ahead.
+
+**Q: What is ReAct? (mid)**
+Reason plus Act: the model thinks about what to do, calls a tool, reads the result, and repeats. Modern tool calling APIs are this same loop in a structured form.
+
+**Q: How do you stop an agent from looping forever? (mid)**
+Set a maximum number of steps, a time limit and a token budget. Detect repeated identical tool calls. When a limit is hit, return a partial answer or hand over to a human.
+
+**Q: How should tools report errors to an agent? (mid)**
+Return the error as a tool result with a clear message and a hint for fixing it, instead of raising an exception that ends the run. The model can often correct its arguments and try again.
+
+**Q: What are the main failure modes of agents? (senior)**
+Wrong tool or wrong arguments, loops, losing the goal in long runs, context filling with tool output, and errors that compound across steps. You manage them with good tool design, step limits, context trimming, traces and evals on full runs.
+
+## 8. LangGraph
+
+Full post: [LangChain and LangGraph](/blog/langchain-and-langgraph)
+
+**Q: LangChain versus LangGraph? (basic)**
+LangChain gives building blocks and integrations for models, prompts and retrievers. LangGraph is a lower-level library for stateful flows with loops and branches, built as a graph of nodes and edges.
+
+**Q: What are state, nodes and edges? (basic)**
+State is a shared typed dictionary. A node is a function that reads the state and returns an update. Edges say which node runs next; conditional edges choose based on the state.
+
+**Q: What is a reducer? (mid)**
+A function that says how a node's update is merged into a state key. Without one the new value replaces the old; with one, such as the message-adding reducer, new items are appended.
+
+**Q: What is a checkpointer and a thread_id? (mid)**
+A checkpointer saves the state after each step to a store such as Postgres. The thread_id names one conversation or run, so the graph can resume it later, survive a crash, or wait for a person.
+
+**Q: How does human-in-the-loop work in LangGraph? (senior)**
+A node calls `interrupt()` with a payload; the graph saves its state and stops. Later you invoke the graph again with `Command(resume=value)` and the same thread_id. The interrupted node runs again from its start, so side effects before the interrupt must be idempotent.
+
+## 9. Memory and context engineering
+
+Full post: [Memory and Context Engineering](/blog/memory-and-context-engineering)
+
+**Q: Short-term versus long-term memory? (basic)**
+Short-term memory is the message history of the current conversation, kept in the context window. Long-term memory is stored outside the model, in a database, and brought back by search in later sessions.
+
+**Q: What is context engineering? (mid)**
+Deciding what goes into the context window at each step: instructions, history, retrieved facts, tool results. The aim is the smallest set of tokens that lets the model do the job well.
+
+**Q: The conversation is getting too long. What are your options? (mid)**
+Keep only the last N turns, summarise older turns, drop or shorten old tool outputs, or move facts into long-term memory and retrieve them when needed. Summaries save tokens but can lose details.
+
+**Q: What is "lost in the middle"? (mid)**
+Models tend to use information at the start and end of a long context better than information in the middle. So put key instructions and the best chunks at the edges, and do not stuff the context with weak material.
+
+**Q: How would you design long-term memory for an assistant? (senior)**
+Extract durable facts and preferences after conversations, store them per user with timestamps, and retrieve the relevant few at the start of a session. Plan for updates, conflicts, deletion on request, and privacy rules.
+
+## 10. MCP
+
+Full post: [MCP: The Model Context Protocol](/blog/mcp-model-context-protocol)
+
+**Q: What is MCP? (basic)**
+The Model Context Protocol is an open standard for connecting AI apps to tools and data. You write a tool server once, and any MCP-capable client can use it.
+
+**Q: Name the three roles. (basic)**
+The host is the AI app the user sees. The client lives inside the host and holds a connection to one server. The server exposes the capabilities.
+
+**Q: What can a server expose? (mid)**
+Tools (functions the model can call), resources (data the app can read) and prompts (reusable templates the user can pick).
+
+**Q: Which transports exist? (mid)**
+stdio for a local server started as a child process, and Streamable HTTP for remote servers. Messages are JSON-RPC in both cases.
+
+**Q: What are the security risks of MCP? (senior)**
+A server's tool descriptions and results go into the model's context, so a bad server can inject instructions. Servers may also hold powerful credentials. Use only trusted servers, least-privilege tokens, user approval for risky tools, and proper authorisation on remote servers.
+
+## 11. Multi-agent and human-in-the-loop
+
+Full post: [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop)
+
+**Q: When is a multi-agent system justified? (mid)**
+When one agent's context is overloaded, when sub-tasks are independent and can run in parallel, or when parts need different tools or permissions. Otherwise one agent is cheaper and easier to debug.
+
+**Q: Describe the supervisor pattern. (mid)**
+A supervisor (orchestrator) agent breaks the task up and sends parts to worker agents, then combines their results. Workers have their own narrow prompts and tools.
+
+**Q: What does multi-agent cost you? (senior)**
+More tokens, more latency, and information lost at each handoff, because agents pass summaries rather than full context. Failures are harder to trace. This is why it should be earned by evals, not chosen by default.
+
+**Q: Where do you put human approval? (mid)**
+Before actions that are hard to undo: payments, sending messages, deleting or changing data, running expensive queries. Show the person exactly what will happen and let them approve, edit or reject.
+
+**Q: How do you avoid approval fatigue? (senior)**
+Auto-approve low-risk actions under a policy written in code, and ask only for the risky ones. Batch requests when possible and show a clear summary. If people approve everything without reading, the check gives no safety.
+
+## 12. Evals
+
+Full post: [Evals: Measuring LLM Apps](/blog/evals)
+
+**Q: Why are evals needed for LLM apps? (basic)**
+Outputs vary and there are many right answers, so ordinary unit tests are not enough. Evals give a number you can track, so you know whether a change helped or hurt.
+
+**Q: What is a golden dataset? (basic)**
+A fixed set of realistic inputs with expected outputs or pass criteria, checked by a person. You run it after every change. Start with 30-100 cases from real usage and grow it from failures.
+
+**Q: Explain recall@k, MRR and nDCG. (mid)**
+Recall@k is the share of relevant items that appear in the top k. MRR averages 1 / rank of the first relevant item. nDCG rewards putting more relevant items higher and supports graded relevance.
+
+**Q: What is faithfulness? (mid)**
+Whether every claim in the answer is supported by the retrieved context. An answer can be faithful but still wrong if the context was wrong, so it is measured alongside correctness.
+
+**Q: How do you trust an LLM judge? (senior)**
+Give it one narrow criterion and a pass/fail output. Have people label a sample, compare the judge with them, and fix the judge prompt until they agree well. Re-check when the judge model changes.
+
+**Q: How do you evaluate an agent? (senior)**
+At three levels: the final result (was the task done), the path (right tools, sensible number of steps), and single steps (was each tool call valid). Also track cost and latency per task.
+
+## 13. Observability
+
+Full post: [Observability and Tracing](/blog/observability-and-tracing)
+
+**Q: What are a trace and a span? (basic)**
+A trace is the full record of one request. A span is one step inside it, such as a retrieval or a model call, with its timing, inputs and outputs. Spans nest to form a tree.
+
+**Q: What do you log for each LLM call? (mid)**
+Model name, prompt version, inputs and outputs, token counts, cost, latency, errors, and ids for the user and session. Redact personal data before storing.
+
+**Q: A user reports a bad answer. How do you investigate? (mid)**
+Find the trace by request or session id, walk through the spans, and see which step went wrong. Then add the case to the eval set so the fix stays fixed.
+
+**Q: What would you alert on in production? (senior)**
+Error rate, p95 latency, time to first token, cost per request and per day, validation failure rate, guardrail triggers, and drops in online quality scores or user feedback.
+
+## 14. Security
+
+Full post: [Guardrails and Security](/blog/guardrails-and-security)
+
+**Q: What is prompt injection? (basic)**
+Text that tricks the model into following the attacker's instructions instead of yours. It works because the model cannot reliably tell instructions from data.
+
+**Q: Direct versus indirect prompt injection? (mid)**
+Direct comes from the user typing it. Indirect is hidden in content the model reads, such as a web page, a document or a tool result, and is more dangerous because the user may never see it.
+
+**Q: How do you defend against it? (senior)**
+There is no complete fix, so limit the damage. Give tools the least privilege, enforce permissions in code, require approval for risky actions, treat all retrieved text as data, filter inputs and outputs, and avoid mixing untrusted content with private data and the power to send data out.
+
+**Q: What are guardrails? (basic)**
+Checks placed around the model. Input guardrails screen what comes in (off-topic, attacks, personal data). Output guardrails screen what goes out (unsafe content, leaks, wrong format).
+
+**Q: How do you handle personal data? (mid)**
+Send the model only what the task needs, redact or mask personal data before it goes into prompts and logs, set retention limits, and check the provider's data-use terms.
+
+## 15. Cost, latency and reliability
+
+Full post: [Cost, Latency and Reliability](/blog/cost-latency-and-reliability)
+
+**Q: What drives the cost of an LLM app? (basic)**
+Input and output tokens times the model's price, times the number of calls. Output tokens usually cost more than input tokens. Agents multiply calls, and long histories multiply input tokens.
+
+**Q: How do you reduce cost? (mid)**
+Use a smaller model where it passes evals, route easy requests to cheap models, shorten prompts and context, use prompt caching, cache repeated answers, cap output length, and use a batch API for work that can wait.
+
+**Q: How do you reduce latency? (mid)**
+Stream the output, pick a faster model, shorten the output, run independent calls in parallel, cache, and cut unnecessary steps. Measure time to first token separately from total time.
+
+**Q: What is prompt caching? (mid)**
+The provider stores the processed form of a prompt prefix that repeats, so later calls with the same prefix are cheaper and faster. Put fixed content first and changing content last to benefit.
+
+**Q: What is a semantic cache and its risk? (senior)**
+It returns a stored answer when a new question is close in meaning to an earlier one. The risk is a wrong hit: two questions that look alike but need different answers, or an answer that belongs to another user. Use a strict threshold and scope the cache per user or tenant.
+
+**Q: The provider returns 429 or goes down. What do you do? (mid)**
+Retry with exponential backoff and jitter on retryable errors, set timeouts, fall back to another model or provider, and use a circuit breaker so you stop hammering a failing service. Degrade gracefully instead of crashing.
+
+## 16. Backend and full-stack
+
+Full post: [Backend and Deployment for AI Apps](/blog/backend-and-deployment-for-ai)
+
+**Q: Why async for LLM backends? (basic)**
+LLM calls are mostly waiting on the network. With async, one worker can serve many requests while they wait, instead of blocking a thread per request.
+
+**Q: How do you stream a response in FastAPI? (mid)**
+Return a `StreamingResponse` whose async generator yields chunks, usually in Server-Sent Events format with the `text/event-stream` media type. The browser reads it and appends tokens as they arrive.
+
+**Q: SSE versus WebSocket? (mid)**
+SSE is one-way, server to client, over plain HTTP, and is enough for streaming text. WebSocket is two-way and suits voice or live collaboration. SSE is simpler to run behind proxies.
+
+**Q: When do you need a job queue? (mid)**
+When work takes longer than a request should stay open, or must survive a restart: document ingestion, long agent runs, webhook handling. The API returns a job id at once and a worker does the work.
+
+**Q: What goes into a Dockerfile for a FastAPI app? (basic)**
+A slim Python base image, dependency install as its own layer for caching, the app code, a non-root user, and a command that starts the server. Secrets come from environment variables at run time, never from the image.
+
+**Q: How do you do auth and rate limiting for an AI API? (senior)**
+Authenticate every request, and pass the user's identity to tools from the server side. Rate limit per user by requests and by tokens or spend, because one user with a loop can burn the whole budget.
+
+## 17. Fine-tuning
+
+Full post: [Fine-Tuning](/blog/fine-tuning)
+
+**Q: When should you fine-tune? (mid)**
+When prompting and RAG are not enough for a stable behaviour: a fixed style or format, a narrow classification task, or making a small model match a large one at lower cost. You need good training data and an eval set first.
+
+**Q: What is LoRA? (mid)**
+Low-Rank Adaptation freezes the original weights and trains small extra matrices added to some layers. It needs far less memory and gives a small adapter file instead of a full model copy.
+
+**Q: What is quantization? (mid)**
+Storing weights with fewer bits, for example 4 or 8 instead of 16 or 32. The model gets smaller and faster with a small loss in quality.
+
+**Q: What is distillation? (mid)**
+Training a small "student" model on outputs from a large "teacher" model. The student becomes good at that one task and is cheaper and faster to run.
+
+**Q: Why not fine-tune to add knowledge? (senior)**
+Facts learned through fine-tuning are unreliable to recall, cannot be cited, and go stale; updating means retraining. RAG handles changing knowledge better. Fine-tuning is for how the model behaves, not what it knows.
+
+## 18. Voice
+
+Full post: [Voice AI](/blog/voice-ai)
+
+**Q: Describe a voice agent pipeline. (basic)**
+Audio comes in, speech-to-text turns it into text, an LLM writes a reply, and text-to-speech turns it into audio. Each stage streams so the reply starts quickly.
+
+**Q: Cascaded pipeline versus speech-to-speech? (mid)**
+A cascade is easier to control, debug and log, and you can swap parts. A speech-to-speech model can be faster and keeps tone of voice, but is harder to inspect and guard.
+
+**Q: What are VAD and barge-in? (mid)**
+VAD (voice activity detection) tells speech from silence and helps decide when the caller has finished. Barge-in is the caller interrupting; the agent must stop speaking and listen at once.
+
+**Q: Where does latency come from in a voice agent? (senior)**
+Waiting to be sure the caller stopped, STT finalising, the LLM's time to first token, the TTS's time to first audio, and the network. You cut it by streaming every stage, using fast models, and keeping replies short.
+
+**Q: What is special about phone calls? (senior)**
+Phone audio is narrowband (8 kHz) and noisy, so speech recognition is harder. There are also telephony concerns: SIP, codecs, DTMF tones, transfers to human agents and recording rules.
+
+## 19. System design prompts
+
+Worked answers and the 7-step framework are in [LLM System Design](/blog/llm-system-design). Practise each one out loud in 35-45 minutes.
+
+- Design "chat with your documents" for a company with 1M documents and access control. (senior)
+- Design a customer-support agent that can issue refunds with human approval. (senior)
+- Design a text-to-SQL analytics assistant for business users. (senior)
+- Design an AI code-review bot for pull requests. (senior)
+- Design a real-time voice agent for call-centre calls. (senior)
+- Design an eval pipeline that runs in CI for an existing RAG product. (mid)
+- Design a gateway that routes requests across several LLM providers with fallbacks and budgets. (senior)
+- Design long-term memory for a personal assistant. (senior)
+
+## 20. Behavioural and project questions
+
+Pick two or three projects you can talk about in depth. Answer with **STAR**: Situation (one line of context), Task (what you had to achieve), Action (what you did and why), Result (a measured number and what you learned). Spend most of the time on Action and Result.
+
+**Q: Walk me through your project. (basic)**
+Give a two-minute tour: the problem, the architecture in four or five boxes, one hard decision, the measured result. Follow the seven steps from [LLM System Design](/blog/llm-system-design) so the story has a shape. Stop and let them choose where to dig.
+
+**Q: Why this design and not another? (mid)**
+Name the option you rejected and the reason, for example "a fixed graph instead of a free agent because the steps were known and I could test each node". Showing a considered trade-off matters more than the choice itself.
+
+**Q: What failed? (mid)**
+Pick a real failure, such as a retrieval miss, a judge that disagreed with you, or an agent loop. Say how you found it (trace, eval case), what you changed, and what the number did. Never say nothing failed.
+
+**Q: How did you measure it? (mid)**
+State the dataset size, the metric, the baseline and the result, and be honest when a change did not help. "v2 was not better on this metric, so I kept v1" is a strong answer.
+
+**Q: Tell me about your LLM work at your current job. (senior)**
+Describe the problem, the patterns (validation of model output, clarification loop, human approval, evals) and the impact in general terms. Do not share private code, data or prompts; say so plainly if asked for details you cannot give.
+
+> [!tip] Prepare one number per project and one failure per project. Those two things cover most behavioural questions.
+
+## 21. Live-coding tasks interviewers give
+
+Write each one from an empty file, with type hints and a small test, in about 20-30 minutes.
+
+| Task | What they check | Background |
+|---|---|---|
+| Retry decorator with exponential backoff and jitter | Decorators, exceptions, async | [Cost, Latency and Reliability](/blog/cost-latency-and-reliability) |
+| LRU cache (dictionary plus ordering, O(1) get and put) | Data structures, clean code | [Cost, Latency and Reliability](/blog/cost-latency-and-reliability) |
+| Text chunker with size and overlap | Edge cases, off-by-one errors | [RAG Fundamentals](/blog/rag-fundamentals) |
+| Cosine similarity search over a list of vectors, top k | NumPy or plain Python maths | [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases) |
+| Reciprocal Rank Fusion of two ranked lists | Knowing the formula, dictionaries | [Advanced RAG](/blog/advanced-rag) |
+| Tool-calling loop without a framework | Message handling, stop condition, max steps | [Agent Fundamentals](/blog/agent-fundamentals) |
+| SSE streaming endpoint in FastAPI | Async generators, event format | [Backend and Deployment for AI Apps](/blog/backend-and-deployment-for-ai) |

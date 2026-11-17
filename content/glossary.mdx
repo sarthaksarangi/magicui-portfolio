@@ -1,0 +1,211 @@
+---
+title: AI Engineering Glossary
+publishedAt: '2026-11-17'
+summary: About 125 AI-engineering terms from A to Z, each in one or two plain sentences, with a link to the post that explains it. Use it as a quick lookup while reading or just before an interview.
+series: AI Engineering, Explained
+seriesOrder: 23
+section: Interview prep
+level: Beginner
+tags:
+- ai-engineering
+- interview
+- glossary
+prereqs:
+- ai-engineering-explained
+---
+
+> [!summary] About 125 AI-engineering terms from A to Z, each in one or two plain sentences, with a link to the post that explains it. Use it as a quick lookup while reading or just before an interview.
+
+The `level` in the frontmatter is beginner because the definitions are written for a first read; the terms themselves cover every level. For questions and answers see [AI Engineering Interview Question Bank](/blog/interview-question-bank).
+
+## A
+
+- **Agent**: An LLM running in a loop that chooses tools, reads their results and decides when the task is done. See [Agent Fundamentals](/blog/agent-fundamentals).
+- **Agentic RAG**: RAG in which the model decides whether to search, judges the results and may search again with a better query. See [Advanced RAG](/blog/advanced-rag).
+- **ANN (approximate nearest neighbour)**: Search that finds vectors very close to the query without checking every vector. It trades a little accuracy for a lot of speed. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Attention**: The part of a transformer that lets each token look at other tokens and weigh which ones matter for its meaning. See [How LLMs Work](/blog/how-llms-work).
+- **Autoregressive**: Producing output one token at a time, with each new token depending on all the earlier ones. See [How LLMs Work](/blog/how-llms-work).
+
+## B
+
+- **Barge-in**: A caller interrupting a voice agent while it is speaking. The agent must stop talking and listen at once. See [Voice AI](/blog/voice-ai).
+- **Batch API**: A provider endpoint for sending many requests that are processed later instead of at once, usually at a lower price. Good for evals and bulk jobs. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **Bi-encoder**: A model that embeds the query and the document separately, so documents can be indexed ahead of time. Fast, but less exact than a cross-encoder. See [Advanced RAG](/blog/advanced-rag).
+- **BM25**: A classic keyword ranking formula that scores documents by how often the query words appear, adjusted for how rare the words are and how long the document is. See [Advanced RAG](/blog/advanced-rag).
+- **BPE (byte-pair encoding)**: A common way to build a tokenizer by repeatedly merging the most frequent pairs of characters into larger pieces. See [How LLMs Work](/blog/how-llms-work).
+
+## C
+
+- **Chain-of-thought**: Asking the model to reason step by step before giving its answer. See [Prompt Engineering](/blog/prompt-engineering).
+- **Checkpointer**: The part of LangGraph that saves the graph's state after each step, so a run can pause, resume or recover from a crash. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **Chunking**: Splitting documents into smaller pieces before embedding them, so retrieval can return just the relevant part. See [RAG Fundamentals](/blog/rag-fundamentals).
+- **Circuit breaker**: A guard that stops calling a failing service for a while instead of retrying forever. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **Citation**: A pointer from a sentence in the answer to the source chunk that supports it. See [RAG Fundamentals](/blog/rag-fundamentals).
+- **Context engineering**: Choosing what goes into the model's context window at each step: instructions, history, retrieved facts and tool results. See [Memory and Context Engineering](/blog/memory-and-context-engineering).
+- **Context window**: The largest number of tokens a model can handle in one request, input plus output. See [How LLMs Work](/blog/how-llms-work).
+- **Contextual retrieval**: Adding a short description of where a chunk sits in its document before embedding it, so the chunk makes sense on its own. See [Advanced RAG](/blog/advanced-rag).
+- **Cosine similarity**: A score for how closely two vectors point in the same direction; closer to 1 means more similar. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Cross-encoder**: A model that reads the query and a document together and outputs one relevance score. Accurate but slow, so it is used for reranking. See [Advanced RAG](/blog/advanced-rag).
+
+## D
+
+- **Dense retrieval**: Search using embeddings, which matches on meaning instead of exact words. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Distillation**: Training a small model to copy the outputs of a large one, to get similar quality on one task at lower cost. See [Fine-Tuning](/blog/fine-tuning).
+- **Dot product**: Multiplying two vectors element by element and adding up the results. For vectors of length 1 it equals cosine similarity. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Durable execution**: Running a long task so that its progress is saved and it can continue after a crash or a pause. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+
+## E
+
+- **Embedding**: A list of numbers that stands for the meaning of a text, so similar texts have nearby vectors. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Endpointing**: Deciding that a speaker has finished their turn. See [Voice AI](/blog/voice-ai).
+- **Eval**: A repeatable test that scores an LLM system's output on a set of examples. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Execution accuracy**: A text-to-SQL metric: run the generated query and the reference query and check that the results match. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Exponential backoff**: Waiting longer after each failed attempt before retrying, usually with some randomness (jitter) added. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+
+## F
+
+- **Faithfulness**: Whether every claim in an answer is supported by the retrieved context. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Fallback**: A second model, provider or simpler path used when the first one fails or is too slow. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **Few-shot**: Putting a handful of example inputs and outputs in the prompt to show the model what you want. See [Prompt Engineering](/blog/prompt-engineering).
+- **Fine-tuning**: Training an existing model further on your own examples to change how it behaves. See [Fine-Tuning](/blog/fine-tuning).
+- **Function calling**: Another name for tool calling: the model outputs a function name and arguments for your code to run. See [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling).
+
+## G
+
+- **Golden dataset**: A fixed, human-checked set of inputs with expected outputs, run after every change to catch regressions. See [Evals: Measuring LLM Apps](/blog/evals).
+- **GraphRAG**: RAG that builds a graph of entities and their links from the documents and retrieves from that graph, which helps with questions spanning many documents. See [Advanced RAG](/blog/advanced-rag).
+- **Grounding**: Tying the model's answer to given sources instead of its own memory. See [RAG Fundamentals](/blog/rag-fundamentals).
+- **Guardrail**: A check on the input or output of a model that blocks, fixes or flags unsafe or off-policy content. See [Guardrails and Security](/blog/guardrails-and-security).
+
+## H
+
+- **Hallucination**: Fluent output that is false or not supported by any source. See [How LLMs Work](/blog/how-llms-work).
+- **Handoff**: One agent passing the task, with context, to another agent or to a person. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **HITL (human-in-the-loop)**: A person approves, edits or rejects a step before the system goes on. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **HNSW**: Hierarchical Navigable Small World, a layered graph index and the most common method for fast approximate vector search. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Hybrid search**: Combining keyword search and vector search and merging the two result lists. See [Advanced RAG](/blog/advanced-rag).
+- **HyDE**: Hypothetical Document Embeddings: the model writes a made-up answer and you search with the embedding of that answer instead of the question. See [Advanced RAG](/blog/advanced-rag).
+
+## I
+
+- **Idempotency**: The property that doing an action twice has the same effect as doing it once. Needed for retries and for resuming after an interrupt. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **Indirect prompt injection**: An attack hidden in content the model reads, such as a web page or document, instead of typed by the user. See [Guardrails and Security](/blog/guardrails-and-security).
+- **Inference**: Running a trained model to get output, as opposed to training it. See [How LLMs Work](/blog/how-llms-work).
+- **Interrupt**: In LangGraph, a call that pauses the graph, saves its state and waits for outside input, usually from a person. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **IVFFlat**: A vector index that groups vectors into clusters and searches only the closest clusters. Faster to build than HNSW, usually with lower recall at the same speed. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+
+## J
+
+- **Jailbreak**: A prompt written to make a model ignore its safety rules. See [Guardrails and Security](/blog/guardrails-and-security).
+- **JSON mode**: An API setting that makes the model return valid JSON, without promising it matches your schema. See [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling).
+- **JSON Schema**: A standard way to describe the shape of JSON data. It is used to define tool arguments and structured outputs. See [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling).
+- **Judge (LLM-as-judge)**: An LLM used to grade another model's output against a written criterion. See [Evals: Measuring LLM Apps](/blog/evals).
+
+## K
+
+- **Knowledge cutoff**: The date after which a model has seen no training data, so it does not know later events. See [How LLMs Work](/blog/how-llms-work).
+- **KV cache**: Stored attention results (keys and values) for tokens already processed, so the model does not redo that work for each new token. It is also what makes prompt caching possible. See [How LLMs Work](/blog/how-llms-work).
+
+## L
+
+- **LangGraph**: A library for building stateful LLM applications as a graph of nodes and edges, with checkpoints and interrupts. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **Latency**: How long a request takes. For LLMs, track time to first token and total time separately. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **LCEL**: LangChain Expression Language, the pipe syntax (`prompt | model | parser`) for joining LangChain components. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **LLM (large language model)**: A neural network trained on huge amounts of text to predict the next token. See [How LLMs Work](/blog/how-llms-work).
+- **Logits**: The raw scores a model gives every possible next token before they are turned into probabilities. See [How LLMs Work](/blog/how-llms-work).
+- **LoRA**: Low-Rank Adaptation, a way to fine-tune by training small extra matrices while the original weights stay frozen. See [Fine-Tuning](/blog/fine-tuning).
+- **Lost in the middle**: The tendency of models to use information in the middle of a long context less well than information at the start or end. See [Memory and Context Engineering](/blog/memory-and-context-engineering).
+
+## M
+
+- **MCP (Model Context Protocol)**: An open standard for connecting AI apps to tools and data through servers that any compatible client can use. See [MCP: The Model Context Protocol](/blog/mcp-model-context-protocol).
+- **Metadata filtering**: Narrowing a vector search by fields such as date, source or user group. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **Model routing**: Sending each request to the cheapest model that can handle it, and harder ones to a stronger model. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **MRR (mean reciprocal rank)**: A retrieval metric: the average of 1 divided by the position of the first relevant result. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Multi-agent system**: Several agents, each with its own prompt and tools, working together on one task. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **Multi-query**: Rewriting one question into several phrasings, searching with each, and merging the results. See [Advanced RAG](/blog/advanced-rag).
+
+## N
+
+- **nDCG**: Normalised Discounted Cumulative Gain, a ranking metric that rewards placing the most relevant results highest and supports graded relevance. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Node**: One step in a LangGraph graph: a function that reads the state and returns an update. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+
+## O
+
+- **Observability**: Being able to see what your system did and why, through traces, logs and metrics. See [Observability and Tracing](/blog/observability-and-tracing).
+- **OpenTelemetry**: An open standard for collecting traces, metrics and logs, supported by most tracing tools. See [Observability and Tracing](/blog/observability-and-tracing).
+- **Orchestrator**: The agent or code that splits a task, hands the parts to workers and combines their results. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **Overlap**: Text repeated between neighbouring chunks so that a sentence cut at a boundary is not lost. See [RAG Fundamentals](/blog/rag-fundamentals).
+
+## P
+
+- **Parent-document retrieval**: Searching over small chunks but passing the larger section they came from to the model. See [Advanced RAG](/blog/advanced-rag).
+- **PEFT**: Parameter-efficient fine-tuning, the family of methods (LoRA is one) that train only a small part of a model. See [Fine-Tuning](/blog/fine-tuning).
+- **pgvector**: A Postgres extension that stores vectors and searches them. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+- **PII**: Personally identifiable information, such as names, phone numbers and addresses, which must be protected in prompts and logs. See [Guardrails and Security](/blog/guardrails-and-security).
+- **Precision@k**: The share of the top k results that are relevant. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Prompt caching**: A provider feature that reuses the processed form of a repeated prompt prefix, making later calls cheaper and faster. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **Prompt injection**: Text that tricks a model into following an attacker's instructions instead of the developer's. See [Guardrails and Security](/blog/guardrails-and-security).
+- **Pydantic**: A Python library for defining data shapes with type hints and validating data against them. See [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling).
+
+## Q
+
+- **QLoRA**: LoRA applied to a quantized base model, so fine-tuning fits on smaller hardware. See [Fine-Tuning](/blog/fine-tuning).
+- **Quantization**: Storing numbers with fewer bits to make a model or a vector index smaller and faster, with a small loss in quality. See [Fine-Tuning](/blog/fine-tuning).
+- **Query rewriting**: Using an LLM to turn the user's message into a clearer, standalone search query. See [Advanced RAG](/blog/advanced-rag).
+
+## R
+
+- **RAG (retrieval-augmented generation)**: Finding relevant text first and placing it in the prompt so the model answers from it. See [RAG Fundamentals](/blog/rag-fundamentals).
+- **RAGAS**: An open-source library of RAG metrics such as faithfulness and context recall. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Rate limit**: A cap set by a provider or by you on requests or tokens per minute. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **ReAct**: Reason plus Act, the loop in which a model thinks, calls a tool, reads the result and repeats. See [Agent Fundamentals](/blog/agent-fundamentals).
+- **Reasoning model**: A model that spends extra hidden tokens thinking before it answers. Better on hard problems, but slower and more costly. See [LLM APIs and Model Selection](/blog/llm-apis-and-model-selection).
+- **Recall@k**: The share of all relevant items that appear in the top k results. See [Evals: Measuring LLM Apps](/blog/evals).
+- **Reducer**: In LangGraph, the function that says how a node's update is merged into a state key, for example by appending to a list. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **Reranker**: A second, more accurate model that re-orders the first search results so the best ones come first. See [Advanced RAG](/blog/advanced-rag).
+- **RRF (Reciprocal Rank Fusion)**: A way to merge ranked lists by adding 1 / (k + rank) for each document across the lists. See [Advanced RAG](/blog/advanced-rag).
+
+## S
+
+- **Sampling**: Choosing the next token at random according to the model's probabilities, instead of always taking the most likely one. See [How LLMs Work](/blog/how-llms-work).
+- **Sandbox**: An isolated environment, such as a container, where untrusted code can run without touching the real system. See [Coding Agents and Agent Infrastructure](/blog/coding-agents-and-agent-infrastructure).
+- **Semantic cache**: A cache that returns a stored answer when a new question is close in meaning to an earlier one. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **Span**: One step inside a trace, such as a model call or a retrieval, with its timing and data. See [Observability and Tracing](/blog/observability-and-tracing).
+- **Sparse retrieval**: Keyword-based search such as BM25, in which a text is represented by the words it contains. See [Advanced RAG](/blog/advanced-rag).
+- **SSE (Server-Sent Events)**: A simple HTTP method for a server to push a stream of events to the browser. It is the usual way to stream LLM tokens. See [Backend and Deployment for AI Apps](/blog/backend-and-deployment-for-ai).
+- **State graph**: LangGraph's main structure: a shared state plus nodes that update it and edges that decide what runs next. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **Streaming**: Sending output piece by piece as it is produced, so the user sees the first words quickly. See [LLM APIs and Model Selection](/blog/llm-apis-and-model-selection).
+- **Structured output**: Model output forced into a fixed shape, usually JSON matching a schema, so code can read it. See [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling).
+- **STT (speech-to-text)**: Turning audio into text. Also called ASR, automatic speech recognition. See [Voice AI](/blog/voice-ai).
+- **Supervisor**: A multi-agent pattern in which one agent decides which worker agent acts next. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **System prompt**: The instructions given by the developer that set the model's role, rules and output format for the whole conversation. See [Prompt Engineering](/blog/prompt-engineering).
+
+## T
+
+- **Temperature**: A setting for how random token choice is. Lower is more predictable, higher is more varied. See [How LLMs Work](/blog/how-llms-work).
+- **Text-to-SQL**: Turning a question in plain language into a SQL query. See [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+- **Thread**: In LangGraph, one conversation or run, named by a thread_id, whose saved state can be resumed. See [LangChain and LangGraph](/blog/langchain-and-langgraph).
+- **Token**: The unit of text a model reads and writes, often a word or part of a word. See [How LLMs Work](/blog/how-llms-work).
+- **Tool call**: The model's structured request to run a named function with given arguments. Your code runs it and returns the result. See [Structured Outputs and Tool Calling](/blog/structured-outputs-and-tool-calling).
+- **Top-k**: Two meanings. In sampling, choose only among the k most likely tokens. In retrieval, return the k best-matching results. See [How LLMs Work](/blog/how-llms-work) and [RAG Fundamentals](/blog/rag-fundamentals).
+- **Top-p (nucleus sampling)**: Choose only among the smallest set of tokens whose probabilities add up to p. See [How LLMs Work](/blog/how-llms-work).
+- **Trace**: The full record of one request through your system, made of nested spans. See [Observability and Tracing](/blog/observability-and-tracing).
+- **Transformer**: The neural network design behind modern LLMs, built from stacked attention layers. See [How LLMs Work](/blog/how-llms-work).
+- **TTFT (time to first token)**: The delay between sending a request and receiving the first piece of output. It is what users feel in a streaming UI. See [Cost, Latency and Reliability](/blog/cost-latency-and-reliability).
+- **TTS (text-to-speech)**: Turning text into spoken audio. See [Voice AI](/blog/voice-ai).
+
+## V
+
+- **VAD (voice activity detection)**: Detecting whether audio contains speech or silence. It is used to find where a speaker starts and stops. See [Voice AI](/blog/voice-ai).
+- **Vector database**: A store built to save embeddings and find the nearest ones to a query quickly. See [Embeddings and Vector Databases](/blog/embeddings-and-vector-databases).
+
+## W
+
+- **WebRTC**: A standard for real-time audio and video between browsers or apps with very low delay. Common for voice agents in the browser. See [Voice AI](/blog/voice-ai).
+- **WebSocket**: A long-lived, two-way connection between client and server, used when both sides need to send data at any time. See [Backend and Deployment for AI Apps](/blog/backend-and-deployment-for-ai).
+- **Worker**: Either a background process that takes jobs from a queue, or a sub-agent that carries out a part of a task given by an orchestrator. See [Backend and Deployment for AI Apps](/blog/backend-and-deployment-for-ai) and [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop).
+
+## Z
+
+- **Zero-shot**: Asking the model to do a task from instructions alone, with no examples. See [Prompt Engineering](/blog/prompt-engineering).

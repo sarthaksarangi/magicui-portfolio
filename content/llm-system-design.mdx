@@ -1,0 +1,279 @@
+---
+title: LLM System Design
+publishedAt: '2026-11-17'
+summary: An AI system design interview is not about naming tools. It is about asking the right questions, picking the simplest design that works, saying how you would measure it, and knowing how it fails.
+series: AI Engineering, Explained
+seriesOrder: 21
+section: Advanced
+level: Advanced
+tags:
+- ai-engineering
+- advanced
+- system-design
+- interview
+prereqs:
+- advanced-rag
+- agent-fundamentals
+- evals
+- cost-latency-and-reliability
+---
+
+> [!summary] An AI system design interview is not about naming tools. It is about asking the right questions, picking the simplest design that works, saying how you would measure it, and knowing how it fails. This post gives you one 7-step framework and five worked designs to practise it on.
+
+## Why this matters
+
+Most AI-engineer interview loops have one round that starts with "Design a ...". There is no single right answer. The interviewer is watching how you think: do you clarify, do you talk about evals before models, do you know what breaks in production. Every other post in this series is a building block; this one shows how to put the blocks together under time pressure.
+
+## The idea in plain words
+
+Think of an architect meeting a client. A bad architect starts drawing a tower at once. A good one first asks: how many people, what budget, what is the soil like, what does "finished" mean. Only then do they sketch, and they start with the plain structure before the fancy roof.
+
+An LLM system design answer works the same way. Ask, define success, sketch the simple version, then go deep on the one hard part.
+
+## The 7-step framework
+
+```mermaid
+flowchart LR
+    A["1. Clarify"] --> B["2. Success metrics"] --> C["3. Data and context"] --> D["4. High-level design"] --> E["5. Deep dive on the core"] --> F["6. Production concerns"] --> G["7. Iteration and failures"]
+    G -.-> B
+```
+
+| Step | What you say out loud | Time in a 45-minute round |
+|---|---|---|
+| 1. Clarify requirements and constraints | Who are the users? How many? What must it never do? Latency and budget limits? Is the data private? | 4-5 min |
+| 2. Define success metrics and evals | "Good" means what, as a number? What goes in the golden dataset? | 3-4 min |
+| 3. Data and context sources | Where does the knowledge live, how fresh is it, who may see it? | 3-4 min |
+| 4. High-level architecture | Boxes and arrows: client, API, queue, model calls, stores | 6-8 min |
+| 5. Deep dive on the core | The retrieval pipeline, the agent loop, or the model choice | 10-12 min |
+| 6. Production concerns | Latency, cost, reliability, safety, observability | 6-8 min |
+| 7. Iteration and failure modes | How it fails, how you find out, what v2 looks like | 3-4 min |
+
+Notes on the steps that candidates most often skip:
+
+- **Clarify.** Always ask about scale (documents, users, requests per second), latency (chat or batch), risk (can a wrong answer cost money?), and privacy (can data leave the company?). Write the answers down as assumptions. If the interviewer says "you decide", decide and say why.
+- **Metrics before models.** Name one or two task metrics (recall@k, execution accuracy, precision of comments) plus guardrail metrics (p95 latency, cost per request). See [Evals: Measuring LLM Apps](/blog/evals). Saying "I would build a golden set of 50-100 real questions first" is the single strongest signal you can send.
+- **Data, design, deep dive.** An LLM only knows what is in its prompt, so say what goes in ([Memory and Context Engineering](/blog/memory-and-context-engineering)). Start with one model call, then a fixed workflow, then an agent only if the steps cannot be known in advance ([Agent Fundamentals](/blog/agent-fundamentals)). Go deep on the part with the most risk.
+- **Production and iteration.** Cover streaming, caching, model routing, retries, prompt injection and tracing ([Cost, Latency and Reliability](/blog/cost-latency-and-reliability), [Guardrails and Security](/blog/guardrails-and-security), [Observability and Tracing](/blog/observability-and-tracing)). Then name three ways the system fails and what you would log to catch each.
+
+> [!tip] If you forget everything else, remember the order: questions, numbers, simple design, hard part, failures.
+
+## Design 1: Chat with your documents (1M documents, access control)
+
+**Clarify.** Document types (PDF, wiki, tickets)? How often do they change? Is access per document or per team? Must answers have citations? Assume: mixed formats, daily changes, permissions come from the source systems, citations required, a few thousand internal users.
+
+```mermaid
+flowchart TD
+    subgraph Ingestion
+        S["Sources (wiki, drive, tickets)"] --> P["Parse and chunk"] --> E["Embed"] --> V[("Vector + keyword index<br/>with ACL metadata")]
+    end
+    subgraph Query
+        U["User question"] --> API["API (auth, user groups)"]
+        API --> RW["Rewrite query"]
+        RW --> H["Hybrid search<br/>filtered by user groups"]
+        V --> H
+        H --> RR["Rerank to top 5-8"]
+        RR --> G["LLM answers with citations"]
+        G --> O["Streamed answer"]
+    end
+```
+
+**Key decisions and trade-offs**
+
+- **Access control at retrieval time, not in the prompt.** Store the allowed groups on every chunk and filter the search by the user's groups. Never retrieve everything and ask the model to "ignore what the user may not see". The trade-off is that filtered vector search can be slower or lose recall, so check how your database handles filters ([Embeddings and Vector Databases](/blog/embeddings-and-vector-databases)).
+- **Permission changes must flow through.** When someone loses access, the index must update fast. Sync ACLs on a short schedule or check permissions against the source system once more just before answering (slower, safer).
+- **Hybrid search plus a reranker.** Dense vectors catch meaning, BM25 catches exact terms such as product codes. Merge with RRF, rerank the top 50 down to a handful ([Advanced RAG](/blog/advanced-rag)). The reranker adds latency, so it is the first thing to measure.
+- **Incremental ingestion.** With 1M documents you cannot re-embed everything daily. Hash each document and re-process only what changed. Delete chunks of deleted documents.
+- **Scale.** 1M documents may be tens of millions of chunks. That needs an ANN index (HNSW) and maybe vector quantization. pgvector can work; a dedicated vector database is a reasonable choice at the upper end. Say you would load-test instead of guessing.
+- **Say "I don't know".** If the reranker scores are all low, answer that nothing was found. That is better than a confident guess.
+
+**How it is evaluated.** Retrieval: recall@k and MRR on a golden set of question to source-chunk pairs. Generation: faithfulness and answer correctness with an LLM judge checked against human labels. Access control: a hard test suite in which user A asks about user B's private document and the pass rate must be 100%. Online: thumbs up/down, "no answer" rate, citation click rate.
+
+**Likely follow-ups**
+
+- "A user says the answer is wrong." Open the trace: was the right chunk retrieved? If no, it is a retrieval problem; if yes, a generation problem ([RAG Fundamentals](/blog/rag-fundamentals)).
+- "How do you handle tables and scanned PDFs?" Better parsing, OCR, and keeping tables whole as chunks.
+- "A document contains 'ignore your instructions'." This is indirect prompt injection; treat retrieved text as data and keep tools away from this path ([Guardrails and Security](/blog/guardrails-and-security)).
+
+
+## Design 2: Customer-support agent that can issue refunds
+
+**Clarify.** Which actions (look up order, refund, change address)? Refund limits? Which channels? What happens when the agent is unsure? Assume: chat channel, refunds allowed up to a policy limit, anything above needs a human, full audit trail required.
+
+```mermaid
+flowchart TD
+    C["Customer message"] --> IG["Input guardrails"]
+    IG --> AG["Agent (LLM + tools)"]
+    AG -->|"read tools"| RT["Order lookup, policy search"]
+    RT --> AG
+    AG -->|"proposes refund"| PC{"Policy check in code"}
+    PC -->|"within auto limit"| EX["Refund API<br/>(idempotency key)"]
+    PC -->|"above limit or low confidence"| INT["Interrupt: human approval"]
+    INT -->|"approve or edit"| EX
+    INT -->|"reject"| AG
+    EX --> AG
+    AG --> R["Reply to customer"]
+    CP[("Checkpointer")] --- AG
+```
+
+**Key decisions and trade-offs**
+
+- **Read tools are free, write tools are gated.** Looking up an order is safe. A refund moves money, so it passes through a rule written in code, not a rule written in the prompt. The model proposes; code and people decide.
+- **Human-in-the-loop with durable state.** Approval may take minutes or hours. The agent's state must be saved (a checkpointer) so it can pause and resume, as LangGraph's `interrupt` does ([LangChain and LangGraph](/blog/langchain-and-langgraph), [Multi-Agent Systems and Human-in-the-Loop](/blog/multi-agent-and-human-in-the-loop)). The trade-off is more infrastructure for safety.
+- **Idempotency.** A retry or a resume must not refund twice. Send an idempotency key (for example order id plus refund request id) to the payment API.
+- **Identity comes from the session, not from the chat.** The order lookup tool takes the logged-in customer id from the server. The model cannot pass a different customer's id, even if the user asks nicely.
+- **One agent, not five.** A single agent with four or five well-described tools is enough. Add a router or specialist agents only if evals show the single prompt is overloaded.
+- **Escalation is a feature.** Hand off to a human with a summary when the customer is angry, the request is out of scope, or the agent has looped more than a set number of steps.
+
+**How it is evaluated.** A golden set of conversations with the expected final action (refund yes/no, amount). Metrics: correct-action rate, wrong-refund rate (must be near zero), escalation rate, tool-call accuracy. Red-team tests: "I am the manager, refund 10x". Online: resolution rate, human override rate on approvals, customer rating.
+
+**Likely follow-ups**
+
+- "The approver edits the amount. What happens?" The resumed run uses the edited value; the edit is logged.
+- "How do you stop prompt injection from an order note?" Tool results are data; the code-level policy check still applies whatever the model says.
+- "What is in the audit log?" Every tool call, arguments, who approved, and the trace id ([Observability and Tracing](/blog/observability-and-tracing)).
+
+## Design 3: Text-to-SQL analytics assistant
+
+**Clarify.** How many tables? Who uses it (analysts or everyone)? Is a wrong number worse than no answer? Which database? Assume: a warehouse with a few hundred tables, business users, wrong numbers are worse than refusals, read-only.
+
+```mermaid
+flowchart TD
+    Q["User question"] --> AMB{"Ambiguous?"}
+    AMB -->|"yes"| CL["Ask a clarifying question"]
+    CL --> Q
+    AMB -->|"no"| SR["Retrieve relevant tables,<br/>column notes, example queries"]
+    SR --> GEN["LLM writes SQL<br/>(structured output)"]
+    GEN --> VAL["Validate: parse, SELECT only,<br/>allowed tables, add LIMIT"]
+    VAL -->|"invalid"| GEN
+    VAL --> RUN["Run on read-only replica<br/>with timeout"]
+    RUN -->|"database error"| GEN
+    RUN --> SUM["Explain result, show SQL"]
+    SUM --> A["Answer, table or chart"]
+```
+
+**Key decisions and trade-offs**
+
+- **Schema retrieval instead of dumping the schema.** Hundreds of tables will not fit well in a prompt and they confuse the model. Embed table and column descriptions and retrieve the relevant few. Recall here matters more than anywhere else: a missing table means a wrong query.
+- **A semantic layer.** "Revenue" and "active user" need one written definition. Store business definitions and a handful of verified example queries, and retrieve them as few-shot examples ([Prompt Engineering](/blog/prompt-engineering)).
+- **Safety in the database, not the prompt.** Use a read-only role, a replica, a statement timeout and a row limit. Also parse the SQL and reject anything that is not a single SELECT. Row-level security belongs to the database user, not the model.
+- **Self-correction loop with a cap.** Feed database errors back to the model, at most two or three times.
+- **Clarify or guess.** Asking questions annoys users; guessing gives wrong numbers. A confidence score plus "show the SQL and the assumptions" is a reasonable middle. For risky or expensive queries, ask for human approval before running.
+- **Workflow, not a free agent.** The steps are known in advance, so a fixed graph is easier to test and cheaper.
+
+**How it is evaluated.** **Execution accuracy**: run the generated SQL and the gold SQL and compare the result sets (comparing SQL strings is wrong, since many queries give the same answer). Also: valid-SQL rate, clarification precision (did it ask only when needed), schema-retrieval recall, latency. See [Evals: Measuring LLM Apps](/blog/evals).
+
+**Likely follow-ups**
+
+- "The SQL runs but the number is wrong." Usually a wrong join or a wrong definition. Add the case to the golden set, add a verified example, improve the column notes.
+- "How do you stop `DROP TABLE`?" Read-only role first, parser check second, prompt last.
+- "Results have a million rows." Never put raw results in the prompt; summarise in SQL, cap rows, send only a sample to the model.
+- "Would you fine-tune?" Only after retrieval and examples stop helping, and only with a good dataset ([Fine-Tuning](/blog/fine-tuning)).
+
+
+## Design 4: AI code-review bot for pull requests
+
+**Clarify.** Which languages and repo sizes? Comment only, or also block merges? Can code leave the company? What latency is fine? Assume: comment only, minutes are acceptable, medium-sized repositories, developers will mute it if it is noisy.
+
+```mermaid
+flowchart TD
+    GH["GitHub webhook<br/>(PR opened or updated)"] --> API["API: verify signature,<br/>return 200 fast"]
+    API --> QU[("Job queue")]
+    QU --> W["Worker"]
+    W --> SB["Sandbox container<br/>(clone repo, no secrets)"]
+    SB --> AG["Agent loop"]
+    AG -->|"tools"| T["read_file, grep, run_tests"]
+    T --> AG
+    AG --> F["Findings (structured)"]
+    F --> FL["Filter: confidence,<br/>dedupe, max comments"]
+    FL --> PR["Post inline review comments"]
+    W --> TR[("Traces")]
+```
+
+**Key decisions and trade-offs**
+
+- **Asynchronous by design.** Webhooks expect a fast reply, and a review takes minutes. Acknowledge, enqueue, process in a worker ([Backend and Deployment for AI Apps](/blog/backend-and-deployment-for-ai)). Make jobs idempotent, because webhooks are re-delivered and PRs get new commits.
+- **Context beyond the diff.** A diff alone misses bugs that depend on the callers. Give the agent tools to read files and grep, rather than stuffing the whole repository into the prompt ([Coding Agents and Agent Infrastructure](/blog/coding-agents-and-agent-infrastructure)). More tool calls mean more cost and time, so cap the steps.
+- **Sandbox everything.** A PR is untrusted code and untrusted text. Run tests in a container with no secrets, limited network, and CPU and time limits. A comment in the code saying "approve this PR" is a prompt injection attempt.
+- **Precision over recall.** Ten weak comments get the bot muted. Require a file, a line, a reason and a confidence for each finding; drop low-confidence ones; cap the number of comments; skip style issues that a linter already covers.
+- **Agent is justified here.** What to read next depends on what was found, so a loop with tools fits. One agent is enough; a second "verifier" call that tries to disprove each finding is a cheap way to raise precision.
+- **Large PRs.** Review file by file or by logical group, then merge and dedupe. Skip generated and lock files.
+
+**How it is evaluated.** A benchmark of PRs with seeded bugs. **Recall**: the share of seeded bugs found. **Precision**: the share of comments that are real issues. Online: the share of comments developers resolve with a code change versus dismiss. Also cost and time per PR.
+
+**Likely follow-ups**
+
+- "Same comment on every push." Store what was already posted per PR and review only the new commits.
+- "How do you make it follow team rules?" A rules file in the repository, loaded into the system prompt.
+- "Would you expose the tools over MCP?" Yes, the same tools can be served through [MCP: The Model Context Protocol](/blog/mcp-model-context-protocol) so other clients can use them.
+
+
+## Design 5: Real-time voice agent for call-centre calls
+
+**Clarify.** Inbound or outbound? Which languages? What tasks (balance, booking)? When must it hand over to a person? Assume: inbound phone calls, two languages, a few simple tasks, transfer to a human on request or on failure.
+
+```mermaid
+flowchart LR
+    PH["Caller (phone network)"] --> TEL["Telephony gateway (SIP)"]
+    TEL -->|"audio stream"| ORC["Voice orchestrator"]
+    ORC --> VAD["VAD and turn detection"]
+    VAD --> STT["Streaming STT"]
+    STT --> LLM["LLM (tools, short replies)"]
+    LLM -->|"tool call"| BE["Backend APIs"]
+    BE --> LLM
+    LLM -->|"token stream"| TTS["Streaming TTS"]
+    TTS --> ORC
+    ORC -->|"audio"| TEL
+    ORC -->|"transfer"| HU["Human agent"]
+```
+
+**Key decisions and trade-offs**
+
+- **Cascaded pipeline or speech-to-speech.** A cascade (STT, LLM, TTS) is easier to debug, lets you choose each part, and gives you text to log and guard. A speech-to-speech model can sound more natural and react faster, but is harder to control and inspect. For a regulated call centre, the cascade is the safer default ([Voice AI](/blog/voice-ai)).
+- **Latency budget.** People expect a reply in about a second. Split the budget across turn detection, STT, the LLM's time to first token and the TTS's time to first audio. Everything streams: start speaking the first sentence while the LLM is still writing the rest.
+- **Turn-taking and barge-in.** VAD (voice activity detection) decides when the caller has stopped. If the caller speaks while the agent is talking, stop the TTS at once, cancel the LLM call and remember only what was actually spoken.
+- **Phone audio is poor.** Telephone audio is narrowband (8 kHz), with noise and accents. Choose an STT model that handles phone audio, and confirm critical details ("I heard 4 5 1 2, is that right?").
+- **Slow tools.** If a lookup takes long, say "one moment, let me check" first. Silence feels like a dropped call.
+- **Small, fast model.** Short prompts, short answers, a fast model. Use prompt caching for the fixed system prompt ([Cost, Latency and Reliability](/blog/cost-latency-and-reliability)).
+- **Compliance.** Recording consent, PII redaction in logs, and a quick path to a human.
+
+**How it is evaluated.** Per-turn latency (p50 and p95 from end of speech to first audio), word error rate of the STT on real call audio, task completion rate, transfer rate, interruption handling, and a judge over transcripts for correctness. Test with recorded or simulated calls before real traffic.
+
+**Likely follow-ups**
+
+- "Where does the delay come from?" Trace each stage per turn; the usual suspects are turn detection waiting too long and LLM time to first token.
+- "The caller says 'uh... wait'." Tune endpointing; a semantic turn detector can help more than a longer silence timer.
+- "How do you scale to many calls?" Each call is a long-lived stateful session; scale orchestrator instances and watch provider concurrency limits.
+
+## What interviewers listen for
+
+- You asked questions before drawing.
+- You named a metric and a golden dataset in the first ten minutes.
+- You started simple and added parts only with a reason.
+- You separated what the model decides from what code enforces (permissions, limits, SQL safety).
+- You knew where latency and cost come from and gave at least two ways to cut each.
+- You described how you would debug a bad answer using traces.
+- You named real failure modes and the fallback for each.
+
+## Common mistakes
+
+| Mistake | Why it hurts | Say this instead |
+|---|---|---|
+| Jumping to multi-agent | More cost, more latency, harder to debug, no proven gain | "One agent with good tools first; split only if evals show a need" |
+| No evals | You cannot show it works or improves | "First I build a golden set and a baseline" |
+| Ignoring cost | A design that is too expensive per request never ships | "Small model for routing, caching, cap on steps" |
+| Security in the prompt | Prompts can be talked around | "Enforce in code and in the database" |
+| Agent where a workflow fits | Unpredictable and slower | "The steps are known, so a fixed graph" |
+| Fine-tuning first | Slow and costly to iterate | "Prompting and retrieval first, fine-tune last" |
+| Naming tools without reasons | Sounds like a list of buzzwords | "I pick X because of this constraint" |
+| Skipping failure modes | Looks like no production experience | "Here are three ways this breaks" |
+
+> [!warning] Do not quote exact latencies, prices or benchmark scores you are not sure of. "It depends on the model; I would measure p95 on our own traffic" is a strong answer, not a weak one.
+
+
+## Go deeper
+
+- [Anthropic: Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) - the clearest case for workflows before agents.
+- [What we learned from a year of building with LLMs](https://applied-llms.org/) - hard-won production lessons from six practitioners.
+- [Chip Huyen: Building a generative AI platform](https://huyenchip.com/2024/07/25/genai-platform.html) - a reference architecture that grows one component at a time.
+- [Eugene Yan: Patterns for building LLM-based systems and products](https://eugeneyan.com/writing/llm-patterns/) - evals, RAG, caching and guardrails as reusable patterns.
+- [Hamel Husain: Your AI product needs evals](https://hamel.dev/blog/posts/evals/) - why step 2 of the framework comes so early.

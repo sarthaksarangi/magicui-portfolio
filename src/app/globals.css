@@ -101,12 +101,11 @@
     background-color: var(--shiki-light-bg);
   }
    
-  @media (prefers-color-scheme: dark) {
-    code[data-theme*=" "],
-    code[data-theme*=" "] span {
-      color: var(--shiki-dark);
-      background-color: var(--shiki-dark-bg);
-    }
+  /* Follow the site's theme toggle (next-themes sets .dark on <html>). */
+  .dark code[data-theme*=" "],
+  .dark code[data-theme*=" "] span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
   }
   
   code[data-line-numbers] {
@@ -142,6 +141,56 @@ code[data-line-numbers-max-digits="2"] > [data-line]::before {
 code[data-line-numbers-max-digits="3"] > [data-line]::before {
   width: 3rem;
 }
+/* Blog callouts: > [!summary] / [!tip] / [!warning] / [!example] */
+.prose .callout {
+  @apply my-6 rounded-lg border-l-4 px-4 py-3 not-italic;
+  border-left-color: hsl(var(--callout));
+  background: hsl(var(--callout) / 0.08);
+  --callout: 215 70% 50%;
+}
+.prose .callout-summary,
+.prose .callout-abstract,
+.prose .callout-tldr { --callout: 215 70% 50%; }
+.prose .callout-tip,
+.prose .callout-hint { --callout: 150 55% 38%; }
+.prose .callout-warning,
+.prose .callout-caution { --callout: 32 90% 48%; }
+.prose .callout-example { --callout: 265 55% 55%; }
+.prose .callout > p { @apply my-2; }
+.prose .callout > p.callout-title {
+  @apply mt-0 mb-1 text-sm font-semibold;
+  color: hsl(var(--callout));
+}
+.prose .callout :is(pre, table) { @apply my-3; }
+
+/* Mermaid diagrams: source is shown until the SVG renders. */
+.prose figure.mermaid-diagram {
+  @apply relative my-8;
+}
+.prose figure.mermaid-diagram pre.mermaid {
+  @apply text-xs text-muted-foreground bg-muted !px-4 whitespace-pre;
+}
+.prose figure.mermaid-diagram[data-rendered] pre.mermaid { display: none; }
+.prose figure.mermaid-diagram .mermaid-svg { @apply flex justify-center; }
+.prose figure.mermaid-diagram .mermaid-svg.measuring {
+  position: absolute;
+  left: -100000px;
+  visibility: hidden;
+}
+.prose figure.mermaid-diagram.expandable { cursor: zoom-in; }
+.prose figure.mermaid-diagram .mermaid-expand {
+  @apply absolute -top-3 right-0 rounded-md border bg-background px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground;
+}
+.mermaid-overlay {
+  @apply fixed inset-0 z-[100] overflow-auto p-6;
+  background: hsl(var(--background));
+}
+.mermaid-overlay-body { width: max-content; min-width: 100%; @apply flex justify-center pt-10; }
+.mermaid-overlay-body svg { max-width: none !important; }
+.mermaid-overlay-close {
+  @apply fixed top-4 right-4 rounded-md border bg-background px-3 py-1 text-sm;
+}
+
 /* Print: light colours, full-width page, no site chrome (used by /resume). */
 @media print {
   @page {

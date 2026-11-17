@@ -32,7 +32,9 @@ export async function generateMetadata({
     summary: description,
     image,
   } = post.metadata;
-  let ogImage = image ? `${DATA.url}${image}` : `${DATA.url}/opengraph-image`;
+  // Without a frontmatter `image`, the generated ./opengraph-image.tsx is
+  // used (Next.js adds og:image for it automatically).
+  const ogImage = image ? `${DATA.url}${image}` : undefined;
 
   return {
     title,
@@ -44,17 +46,13 @@ export async function generateMetadata({
       publishedTime,
       ...(tags ? { tags } : {}),
       url: `${DATA.url}/blog/${post.slug}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
 }
@@ -96,7 +94,7 @@ export default async function Blog({
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${DATA.url}${post.metadata.image}`
-              : `${DATA.url}/opengraph-image`,
+              : `${DATA.url}/blog/${post.slug}/opengraph-image`,
             url: `${DATA.url}/blog/${post.slug}`,
             ...(post.metadata.tags
               ? { keywords: post.metadata.tags.join(", ") }

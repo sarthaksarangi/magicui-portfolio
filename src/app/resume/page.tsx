@@ -199,7 +199,7 @@ export default function ResumePage() {
             Certifications:{" "}
           </span>
           {DATA.certifications
-            .map((cert) =>
+            .map((cert: { title: string; issuer?: string }) =>
               cert.issuer ? `${cert.title} (${cert.issuer})` : cert.title
             )
             .join(" · ")}

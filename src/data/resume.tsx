@@ -183,11 +183,11 @@ export const DATA = {
       start: "Aug 2026",
       end: "Present",
       description:
-        "Built an LLM-powered automation platform with Python, FastAPI, and Pydantic that turns a statement of work and a JRXML report template into a ready-to-apply customized call report, replacing a manual engineering workflow. Designed it to convert each request into a standard requirement template, ask clarifying questions and score feasibility until the requirement is workable, and send the LLM only the relevant parts of the template, with Pydantic validating the output at every step. Added an explanation of every change (what, why, and how) beside a side-by-side comparison, with human approval required before anything is applied. Evaluated output quality with an LLM-as-judge and tests against a golden dataset, and used the results to refine the tool's knowledge base. Also delivered voice bot integrations with IVR, Next.js interfaces, middleware, and wrapper APIs.",
+        "Built an LLM-powered automation platform with Python, FastAPI, and Pydantic that turns a statement of work and a JRXML report template into a ready-to-apply customized call report, cutting common customizations from a full day of manual work to about 5 minutes. It is in beta with the Professional Services team across 6 default call-detail reports, covering column changes, logic changes, and data extraction from IVR and data tables. Designed it to convert each request into a standard requirement template, ask clarifying questions and score feasibility until the requirement is workable, and send the LLM only the relevant parts of the template, with Pydantic validating the output at every step. Added an explanation of every change (what, why, and how) beside a side-by-side comparison, with human approval required before anything is applied. Evaluated output quality with an LLM-as-judge and tests against a golden dataset, and used the results to refine the tool's knowledge base. Also delivered voice bot integrations with IVR, Next.js interfaces, middleware, and wrapper APIs.",
       bullets: [
-        "Engineered an **LLM-powered automation platform** with **Python**, **FastAPI**, and **Pydantic** that turns a statement of work and a **JRXML** report template into a ready-to-apply customized call report, replacing a manual engineering workflow.",
-        "Designed a **requirement-extraction pipeline** that normalizes each request into a standard template, validates LLM output at every step with **Pydantic**, and sends the LLM only the relevant template fragments, never the full file.",
-        "Built an **interactive clarification loop** with a **feasibility score** and **human-in-the-loop approval**: the app asks targeted questions until a requirement is implementable, explains every change (**what, why, and how**) beside a **side-by-side diff**, and applies nothing until the user approves.",
+        "Engineered an **LLM-powered automation platform** with **Python**, **FastAPI**, and **Pydantic** that turns a statement of work and a **JRXML** report template into a ready-to-apply customized call report, cutting common customizations from **1 day of manual work to ~5 minutes**.",
+        "Rolled it out in **beta to the Professional Services team** across **6 default call-detail reports**, handling column additions, removals, and reordering, logic changes, and data extraction from **IVR** and data tables.",
+        "Designed a **requirement-extraction pipeline** with a **clarification loop** and **feasibility score**: requests are normalized into a standard template, only relevant template fragments reach the LLM, **Pydantic** validates every step, and each change is explained (**what, why, how**) beside a **side-by-side diff** with **human approval** before it is applied.",
         "Evaluated output quality with an **LLM-as-judge** and tests against a **golden dataset**, using the results to curate the tool's **knowledge base** of text and Markdown files.",
         "Delivered **voice bot integrations with IVR**, **Next.js** interfaces, middleware, and wrapper APIs.",
       ],
@@ -400,7 +400,7 @@ export const DATA = {
     },
     {
       title: "Oracle SQL & Database Design",
-      issuer: "",
+      issuer: "Udemy",
     },
   ],
 } as const;

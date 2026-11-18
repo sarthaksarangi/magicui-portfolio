@@ -221,8 +221,7 @@ export const DATA = {
       description:
         "Led the backend team for a full-stack Meal Booking POC, designing 4 REST microservices (User, Auth, Booking, Ticketing) on Node.js, Express, and PostgreSQL with Prisma ORM, plus a complete JWT auth system with access/refresh token lifecycle and RBAC across 3 user roles. Built the React/TypeScript frontend with a multi-role dashboard, cutting redundant API calls by 40% via Axios interceptors and TanStack Query caching.",
       bullets: [
-        "Led the backend team for a **full-stack Meal Booking POC**, designing 4 REST microservices (User, Auth, Booking, Ticketing) on **Node.js/Express/PostgreSQL** with Prisma ORM and JWT auth with access/refresh tokens and RBAC across 3 user roles.",
-        "Built the **React/TypeScript** frontend with a multi-role dashboard, cutting redundant API calls by **40%** via TanStack Query caching.",
+        "Led the backend team for a **full-stack Meal Booking POC**: 4 REST microservices on **Node.js/Express/PostgreSQL**, JWT auth with RBAC across 3 roles, and a **React/TypeScript** dashboard that cut redundant API calls by **40%** via TanStack Query.",
       ],
     },
   ],

@@ -137,7 +137,6 @@ export const DATA = {
 
   contact: {
     email: "sarthaksarangi.dev@gmail.com",
-    tel: "+91 7008664609",
     social: {
       GitHub: {
         name: "GitHub",
